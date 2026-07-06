@@ -23,7 +23,7 @@
 * Copy VNyan-LIV.dll into the VNyan\Items\Assemblies folder  
 
 ## OnAirTap setup - BepInEx
-* Download the latest version of [OnAirTap](https://github.com/LumKitty/LIVnyan/releases/tag/OnAirTap-binary)
+* Download the latest version of [OnAirTap](https://github.com/milkydelta/OnAirTap)
 * Install the latest version of [BepInEx](https://github.com/bepinex/bepinex) following its instructions
 * Install the mod by unpacking the OpenBrush build. If you are attempting to use this with a different game you will need to use a different directory for OAT_KlakSpout.dll instead of OpenBrush_Data. Typically it will be GameName_Data
 * Start the game once and quit
@@ -70,7 +70,7 @@
 * (Optional) group these up.
 
 ## OnAirTap setup - Beat Saber
-* Setup is the same as for BepInEx except that the config file is now <GAMEDIR>\UserData\OnAirTap.json and it is not split into individual sections. The following settings should be changed:
+* Setup is the same as for BepInEx except you do not need to install BepInEx, the config file is now <GAMEDIR>\UserData\OnAirTap.json and it is not split into individual sections. The following settings should be changed:
   ```
   "ShouldRenderBG": true,
   "ShouldRenderFG": true,
