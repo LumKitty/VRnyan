@@ -123,7 +123,8 @@ I recommend using a game where you are always holding an object, such as Beat Sa
 ### Aligning hands to weapons
 First move your hands around and observe that your saber moves ahead of your hands.  
 Using a video player that allows you to step through frame by frame (I use AVIDemux), make a note of how many frames it takes for your hand to reach the saber. Multiply this by 16.667 and set LIV's camera latency to the resulting value (for OnAirTap, use a Render Delay filter on all your OAT sources, except for VNyan).  
-Test and record again, adjust camera latency as necessary, repeat until you are 100% happy with the result. Do not go on to the next step until then.
+Test and record again, adjust camera latency as necessary, repeat until you are 100% happy with the result. Do not go on to the next step until then.  
+My personal setting is 100. YMMV
 ### Aligning camera pans
 If you will only be using a static camera this step is not strictly necessary.  
 Create a temporary set of nodes that switch between camera positions with a transition time of around 1000ms, start recording and fire these nodes
@@ -131,7 +132,8 @@ If your model moves ahead of the VR world then you will need to use the "Cursed 
 As before, count how many frames it takes for LIV's camera to catch up to VNyan's. The result will likely be the same (or very close) to the LIV camera delay you set in the previous step.
 call ```_lum_liv_enable``` passing this result into value1 and move the camera again. Hopefully it now lines up, but if necessary re-record and adjust until it's perfect
 Once you have the final value, close VNyan, edit LIVnyan.cfg and set Cursed camera there to make the change permanent 
-Remember that if you change the LIV camera latency, you will also need to adjust the Cursed Camera latency
+Remember that if you change the LIV camera latency, you will also need to adjust the Cursed Camera latency  
+My personal setting is 100 for LIV, 72 for OAT. Again YMMV
 
 ## Lum's recommendations
 These are completely optional, but are how I do things
