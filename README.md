@@ -1,5 +1,5 @@
-## LIVNyan - A camera sync plugin for VNyan and LIV VR
-Syncs your VNyan camera over to LIV mixed reality  
+## VRnyan - A camera sync plugin for VNyan and VR Mixed reality (formerly LIVnyan)
+Syncs your VNyan camera over to OnAirTap, or LIV mixed reality  
 Allows VNyan to be your VTuber renderer allowing for high quality models and full redeem support - no more VRMs!  
 
 ![A catgirl VTuber plays Beat Saber](https://github.com/LumKitty/LIVnyan/blob/master/LIVnyan_demo.gif?raw=true)  
@@ -21,9 +21,13 @@ As an alternative, [OnAirTap](https://github.com/milkydelta/OnAirTap) by [MilkyD
   * [Spout2](https://github.com/Off-World-Live/obs-spout2-plugin) plugin
   * [Source Clone](https://obsproject.com/forum/resources/source-clone.1632/) plugin (LIV-only, not required for OnAirTap)
   * [Advanced Mask](https://obsproject.com/forum/resources/advanced-masks.1856/) plugin
-* LIV VR
-  * Mixed Reality Avatar mode configured and working
-  * (Optional) A VRM file with the same rigging as your VSFAvatar
+* OnAirTap, or LIV VR
+  * OnAirTap specific
+    * Understanding of how to mod your chosen game (BepInEx or BSIPA)
+    * Your game uses the LIV 1.5 SDK (If LIV_Bridge.dll is present it should work. If it has LIV_Native.dll or no LIV dlls then your game will not work)
+  * LIV VR specific
+    * Mixed Reality Avatar mode configured and working
+    * (Optional) A VRM file with the same rigging as your VSFAvatar
 * General
   * A sufficiently powerful PC
   * Understanding of OBS filters
