@@ -9,6 +9,8 @@ Please read these instructions carefully before trying to set this up!
 ## Overview
 It is important to understand how this plugin works. Normally LIV will split the VR scene into effectively three image layers, background, glow and foreground. It will then build up a composite image: Background, VRM avatar, glow layer and foreground. This setup works by replacing the VRM avatar layer with a capture from VNyan and manually doing the compositing of the layers in OBS, instead of letting LIV do it. In order to make VNyan fit correctly there are a pair of plugins, one for VNyan that sends its camera position, over to the LIV plugin which sets the camera plugin to match VNyan.
 
+As an alternative, [OnAirTap](https://github.com/milkydelta/OnAirTap) by [MilkyDelta](https://github.com/milkydelta/) is a direct replacement for LIV with native Spout2 support for its layers, Linux support, custom resolutions and useful advanced features such as improved compositing based on VTuber bone position!  
+
 ## Prerequisites
 * VNyan
   * SteamVR tracking configured and working
@@ -17,7 +19,7 @@ It is important to understand how this plugin works. Normally LIV will split the
   * (Optional) My [Extras Plugin](https://github.com/LumKitty/LumsExtras/) to prevent accidentally resizing VNyan while in VR
 * OBS
   * [Spout2](https://github.com/Off-World-Live/obs-spout2-plugin) plugin
-  * [Source Clone](https://obsproject.com/forum/resources/source-clone.1632/) plugin
+  * [Source Clone](https://obsproject.com/forum/resources/source-clone.1632/) plugin (LIV-only, not required for OnAirTap)
   * [Advanced Mask](https://obsproject.com/forum/resources/advanced-masks.1856/) plugin
 * LIV VR
   * Mixed Reality Avatar mode configured and working
@@ -32,6 +34,8 @@ It is important to understand how this plugin works. Normally LIV will split the
 * Enable plugins in VNyan settings, if not already enabled  
 * Copy VNyan-LIV.dll into the VNyan\Items\Assemblies folder  
 * Copy LIV_VNyan.dll into C:\Users\\\<you>\Documents\LIV\Plugins\CameraBehaviours
+
+**If you will be using OnAirTap instead of LIV, see [OAT-README.md](https://github.com/LumKitty/LIVnyan/blob/master/README-OAT.md) and then skip directly to "VNyan Setup" below**
 
 ## LIV Setup
 * Start Virtual Cameras and Avatars
@@ -77,7 +81,7 @@ Note: The numbers in this section assume your target resolution is 1920x1080. If
   ![image](https://github.com/user-attachments/assets/112250d1-3203-4a98-a06d-a98a56ece377)
 
 ## VNyan Setup
-* Ensure that VNyan's window size is the same size as all your LIV sources  
+* Ensure that VNyan's window size is the same size as all your LIV sources (not required if using OnAirTap with ReadWindowResolution enabled)  
 * Configure SteamVR and calibrate your trackers in the usual way
 * Ensure the plugin is active by one of the following methods
   * Click the button in the VNyan plugins screen to toggle enable/disable
@@ -118,8 +122,9 @@ Because this setup is merging two separate video feeds from two different source
 I recommend using a game where you are always holding an object, such as Beat Saber, and recording these tests
 ### Aligning hands to weapons
 First move your hands around and observe that your saber moves ahead of your hands.  
-Using a video player that allows you to step through frame by frame (I use AVIDemux), make a note of how many frames it takes for your hand to reach the saber. Multiply this by 16.667 and set LIV's camera latency to the resulting value.  
-Test and record again, adjust camera latency as necessary, repeat until you are 100% happy with the result. Do not go on to the next step until then.
+Using a video player that allows you to step through frame by frame (I use AVIDemux), make a note of how many frames it takes for your hand to reach the saber. Multiply this by 16.667 and set LIV's camera latency to the resulting value (for OnAirTap, use a Render Delay filter on all your OAT sources, except for VNyan).  
+Test and record again, adjust camera latency as necessary, repeat until you are 100% happy with the result. Do not go on to the next step until then.  
+My personal setting is 100. YMMV
 ### Aligning camera pans
 If you will only be using a static camera this step is not strictly necessary.  
 Create a temporary set of nodes that switch between camera positions with a transition time of around 1000ms, start recording and fire these nodes
@@ -127,7 +132,8 @@ If your model moves ahead of the VR world then you will need to use the "Cursed 
 As before, count how many frames it takes for LIV's camera to catch up to VNyan's. The result will likely be the same (or very close) to the LIV camera delay you set in the previous step.
 call ```_lum_liv_enable``` passing this result into value1 and move the camera again. Hopefully it now lines up, but if necessary re-record and adjust until it's perfect
 Once you have the final value, close VNyan, edit LIVnyan.cfg and set Cursed camera there to make the change permanent 
-Remember that if you change the LIV camera latency, you will also need to adjust the Cursed Camera latency
+Remember that if you change the LIV camera latency, you will also need to adjust the Cursed Camera latency  
+My personal setting is 100 for LIV, 72 for OAT. Again YMMV
 
 ## Lum's recommendations
 These are completely optional, but are how I do things
