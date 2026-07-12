@@ -19,7 +19,7 @@ using System;
 using UnityEngine;
 using System.IO;
 using System.IO.MemoryMappedFiles;
-using static SharedValues;
+using static Shared.LegacySharedValues;
 using Newtonsoft.Json;
 
 // User defined settings which will be serialized and deserialized with Newtonsoft Json.Net.
@@ -35,7 +35,7 @@ public class VNyanCameraPlugin : IPluginCameraBehaviour {
     public string ID => "VNyanCameraPlugin";
     public string name => PluginName;
     public string author => Author;
-    public string version => SharedValues.Version;
+    public string version => "1.3";
     PluginCameraHelper _helper;
     string LogFileName;
 
@@ -81,9 +81,9 @@ public class VNyanCameraPlugin : IPluginCameraBehaviour {
             Log("Bool size: " + sizeof(bool).ToString() + " bytes");
             _helper = helper;
             Log("Creating file");
-            mmf = MemoryMappedFile.CreateOrOpen(SharedValues.MMFname, SharedValues.MMFSize);
+            mmf = MemoryMappedFile.CreateOrOpen(MMFname, MMFSize);
             Log("Creating accessor");
-            mmfAccess = mmf.CreateViewAccessor(0, SharedValues.MMFSize, MemoryMappedFileAccess.Read);
+            mmfAccess = mmf.CreateViewAccessor(0, MMFSize, MemoryMappedFileAccess.Read);
             //foreach (Camera camera in Camera.allCameras) {
             //    camera.usePhysicalProperties = true;
             //}

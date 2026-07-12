@@ -54,8 +54,8 @@
     <Compile Include="..\Shared\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\SharedValues.cs">
-      <Link>Properties\SharedValues.cs</Link>
+    <Compile Include="..\Shared\LegacySharedValues.cs">
+      <Link>Properties\LegacySharedValues.cs</Link>
     </Compile>
     <Compile Include="LIV_VNyan.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

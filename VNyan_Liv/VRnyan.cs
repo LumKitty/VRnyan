@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.IO.MemoryMappedFiles;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UIElements;
 using VNyanInterface;
 
-namespace VNyan_Liv {
+namespace VRnyan {
     [DefaultExecutionOrder(15000)]
     public class CameraTransform {
         public Vector3 Position;
@@ -27,20 +28,22 @@ namespace VNyan_Liv {
         }
     }
     
-    public class VNyan_Liv : MonoBehaviour, IVNyanPluginManifest, IButtonClickedHandler, ITriggerHandler {
+    public class VRnyan : MonoBehaviour, IVNyanPluginManifest, IButtonClickedHandler, ITriggerHandler {
+        private const string VersionString = "2.0-RC1";
         public string PluginName { get; } = SharedValues.PluginName;
-        public string Version { get; } = SharedValues.Version;
-        public string Title { get; } = "VNyan to LIV camera sync";
+        public string Version { get; } = VersionString;
+        public string Title { get; } = SharedValues.PluginName+" "+VersionString;
         public string Author { get; } = SharedValues.Author;
         public string Website { get; } = SharedValues.Website;
 
-        private readonly string SettingsFileName = VNyanInterface.VNyanInterface.VNyanSettings.getProfilePath()+"\\LIVnyan.cfg";
+        private readonly string OldSettingsFileName = VNyanInterface.VNyanInterface.VNyanSettings.getProfilePath()+"\\LIVnyan.cfg";
+        private readonly string SettingsFileName = VNyanInterface.VNyanInterface.VNyanSettings.getProfilePath() + "\\VRnyan.cfg";
 
         private static float[] CamData = new float[9];
         private static MemoryMappedFile mmf = null;
         private static MemoryMappedViewAccessor mmfAccess;
         private static int VNyanSettings = 2;
-        private static GameObject objLIVnyan;
+        private static GameObject objVRnyan;
         private static uint CursedCameraDelay = 0;
         private static HumanBodyBones? BoneClip = HumanBodyBones.Hips;   //_lum_liv_BoneClip
         private static float BoneClipDistanceAdjust = 0;                 //_lum_liv_BoneClipDistanceAdjust
@@ -50,25 +53,39 @@ namespace VNyan_Liv {
 
         private void ErrorHandler(Exception e) {
             VNyanInterface.VNyanInterface.VNyanParameter.setVNyanParameterString("_lum_liv_err", e.ToString());
-            UnityEngine.Debug.Log("[LIVnyanERR] " + e.ToString());
+            UnityEngine.Debug.Log("[VRnyan] ERR:" + e.ToString());
         }
 
         private void Log(string message) {
             if ((VNyanSettings & SharedValues.LOGENABLED) != 0) {
-                UnityEngine.Debug.Log("[LIVnyan] " + message);
+                UnityEngine.Debug.Log("[VRnyan] " + message);
             }
         }
 
         public void InitializePlugin() {
             try {
-                Log("LumKitty's VNyan-LIV plugin version " + Version + " started");
-                Log("Spawning gameobject: VNyan_LIV");
-                objLIVnyan = new GameObject("VNyan_LIV", typeof(VNyan_Liv));
-                objLIVnyan.SetActive(false);
+                Log("VRNyan version " + Version + " started");
+                string OldDLLpath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Items\\Assemblies\\VNyan_Liv.dll");
+                Log("Checking for old DLL in: " + OldDLLpath);
+                if (System.IO.File.Exists(OldDLLpath)) {
+                    Log("ERROR: Old VNyan_LIV.dll detected, disabling VRnyan");
+                    Log("ERROR: Please delete " + OldDLLpath);
+                    VNyanInterface.VNyanInterface.VNyanUI.registerPluginButton("VRnyan: Upgrade incomplete, please see https://lum.uk/VRN", null);
+                    return;
+                } else {
+                    Log("Register plugin button");
+                    VNyanInterface.VNyanInterface.VNyanUI.registerPluginButton("VRnyan", this);
+                }
+
+                Log("Spawning gameobject: VRnyan");
+                objVRnyan = new GameObject("VRnyan", typeof(VRnyan));
+                objVRnyan.SetActive(false);
+                Log("Register trigger listener");
                 VNyanInterface.VNyanInterface.VNyanTrigger.registerTriggerListener(this);
-                VNyanInterface.VNyanInterface.VNyanUI.registerPluginButton("LIVnyan", this);
+                
+                
                 LoadPluginSettings();
-                objLIVnyan.SetActive((VNyanSettings & SharedValues.CAMENABLED) != 0);
+                objVRnyan.SetActive((VNyanSettings & SharedValues.CAMENABLED) != 0);
                 InitialiseMMF();
                 Log("Window size set to to: " + Screen.width.ToString() + "," + Screen.height.ToString());
                 mmfAccess.Write(SharedValues.MMFPos_ResX, Screen.width);
@@ -80,10 +97,21 @@ namespace VNyan_Liv {
 
         private void LoadPluginSettings() {
             try {
+                Dictionary<string, string> settings = null;
+                bool SettingMissing = true;
                 // Get settings in dictionary
-                Log("Reading settings from: " + SettingsFileName);
-                Dictionary<string, string> settings = VNyanInterface.VNyanInterface.VNyanSettings.loadSettings(SettingsFileName);
-                bool SettingMissing = false;
+                if (!System.IO.File.Exists(SettingsFileName)) {
+                    if (System.IO.File.Exists(OldSettingsFileName)) {
+                        Log("Old LIVnyan.cfg file found, renaming to VRnyan.cfg and reading");
+                        System.IO.File.Move(OldSettingsFileName, SettingsFileName);
+                        settings = VNyanInterface.VNyanInterface.VNyanSettings.loadSettings(SettingsFileName);
+                        SettingMissing = false;
+                    }
+                } else {
+                    Log("Reading settings from: " + SettingsFileName);
+                    settings = VNyanInterface.VNyanInterface.VNyanSettings.loadSettings(SettingsFileName);
+                    SettingMissing = false;
+                }
                 int tempVNyanSettings = 0;
                 if (settings != null) {
                     // Read string value
@@ -200,7 +228,7 @@ namespace VNyan_Liv {
 
         public void pluginButtonClicked() {
             Log("Plugin button clicked");
-            SetActive(!objLIVnyan.activeInHierarchy);
+            SetActive(!objVRnyan.activeInHierarchy);
             Log("Enabled: " + ((VNyanSettings & SharedValues.CAMENABLED) != 0).ToString());
         }
         
@@ -221,13 +249,13 @@ namespace VNyan_Liv {
                 VNyanSettings = VNyanSettings | SharedValues.CAMENABLED;
                 Log("Write settings to MMF");
                 mmfAccess.Write(SharedValues.MMFPos_Settings, VNyanSettings);
-                Log("Enable LIVnyan GameObject");
-                objLIVnyan.SetActive(true);
+                Log("Enable VRnyan GameObject");
+                objVRnyan.SetActive(true);
                 Log("Disable physical camera");
                 Camera.main.usePhysicalProperties = false;
             } else {
                 VNyanSettings = (VNyanSettings | SharedValues.CAMENABLED) - SharedValues.CAMENABLED;
-                objLIVnyan.SetActive(false);
+                objVRnyan.SetActive(false);
                 CursedCamera.Clear();
                 mmfAccess.Write(SharedValues.MMFPos_Settings, VNyanSettings);
                 Camera.main.usePhysicalProperties = true;
@@ -238,44 +266,50 @@ namespace VNyan_Liv {
             try {
                 if (name.Length > 10) {
                     name = name.ToLower();
-                    if (name.Substring(0, 9) == "_lum_liv_") {
-                        Log("LIV: Detected trigger: " + name);
-                        switch (name.Substring(8)) {
-                            case "_enable":
-                                if (int1 > 0) {
-                                    CursedCameraDelay = (uint)int1;
-                                    Log("CursedCamera set to: " + CursedCameraDelay.ToString());
-                                } else if (int1 <0) {
-                                    CursedCameraDelay = 0;
-                                    Log("CursedCamera disabled");
+                    if (name.Substring(0, 8) == "_lum_vr_") {
+                        Log("Detected trigger: " + name);
+                        name = name.Substring(7);
+                    } else if (name.Substring(0, 9) == "_lum_liv_") {
+                        Log("Detected trigger: " + name);
+                        name = name.Substring(8);
+                    } else {
+                        return;
+                    }
+                    switch (name) {
+                        case "_enable":
+                            if (int1 > 0) {
+                                CursedCameraDelay = (uint)int1;
+                                Log("CursedCamera set to: " + CursedCameraDelay.ToString());
+                            } else if (int1 < 0) {
+                                CursedCameraDelay = 0;
+                                Log("CursedCamera disabled");
+                            }
+                            SetActive(true);
+                            break;
+                        case "_disable":
+                            SetActive(false);
+                            break;
+                        case "_setbone":
+                            if (text1.Length > 0) {
+                                HumanBodyBones TempBoneClip;
+                                if (Enum.TryParse<HumanBodyBones>(text1, out TempBoneClip)) {
+                                    if ((VNyanSettings & SharedValues.OATREADCLIPPLANEPOS) == 0) { VNyanSettings += SharedValues.OATREADCLIPPLANEPOS; }
+                                    BoneClip = TempBoneClip;
+                                    Log("Clipping bone tracker set to: " + BoneClip.ToString());
+                                } else {
+                                    //TODO: Talk with MilkyDelta about VNyan controlling the ReadClipPlaneLocation
+                                    if ((VNyanSettings & SharedValues.OATREADCLIPPLANEPOS) != 0) { VNyanSettings -= SharedValues.OATREADCLIPPLANEPOS; }
+                                    BoneClip = null;
                                 }
-                                SetActive(true);
-                                break;
-                            case "_disable":
-                                SetActive(false);
-                                break;
-                            case "_setbone":
-                                if (text1.Length > 0) {
-                                    HumanBodyBones TempBoneClip;
-                                    if (Enum.TryParse<HumanBodyBones>(text1, out TempBoneClip)) {
-                                        if ((VNyanSettings & SharedValues.OATREADCLIPPLANEPOS) == 0) { VNyanSettings += SharedValues.OATREADCLIPPLANEPOS; }
-                                        BoneClip = TempBoneClip;
-                                        Log("Clipping bone tracker set to: " + BoneClip.ToString());
-                                    } else {
-                                        //TODO: Talk with MilkyDelta about VNyan controlling the ReadClipPlaneLocation
-                                        if ((VNyanSettings & SharedValues.OATREADCLIPPLANEPOS) != 0) { VNyanSettings -= SharedValues.OATREADCLIPPLANEPOS; }
-                                        BoneClip = null;
-                                    }
+                            }
+                            if (text2.Length > 0) {
+                                float TempBoneClipDist;
+                                if (float.TryParse(text2, out TempBoneClipDist)) {
+                                    BoneClipDistanceAdjust = TempBoneClipDist;
+                                    Log("Bone Clip Distance Adjustment set to: " + BoneClipDistanceAdjust.ToString());
                                 }
-                                if (text2.Length > 0) {
-                                    float TempBoneClipDist;
-                                    if (float.TryParse(text2, out TempBoneClipDist)) {
-                                        BoneClipDistanceAdjust = TempBoneClipDist;
-                                        Log("Bone Clip Distance Adjustment set to: " + BoneClipDistanceAdjust.ToString());
-                                    }
-                                }
-                                break;
-                        }
+                            }
+                            break;
                     }
                 }
             } catch (Exception e) {
@@ -301,7 +335,7 @@ namespace VNyan_Liv {
                 mmfAccess.Write(SharedValues.MMFPos_CamRotZ, Camera.main.transform.rotation.z);
                 mmfAccess.Write(SharedValues.MMFPos_CamFOV,  Camera.main.fieldOfView);
                 
-                // Only used by OnAirTap. Ignored by LIV
+                // Only used by OnAirTap. Ignored by LIV_VNyan.dll
                 mmfAccess.Write(SharedValues.MMFPos_ResX, Screen.width);
                 mmfAccess.Write(SharedValues.MMFPos_ResY, Screen.height);
 

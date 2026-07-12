@@ -18,8 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\Shared\LegacySharedValues.cs" Link="Properties\LegacySharedValues.cs" />
     <Compile Include="..\Shared\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
-    <Compile Include="..\Shared\SharedValues.cs" Link="Properties\SharedValues.cs" />
   </ItemGroup>
 
   <ItemGroup>

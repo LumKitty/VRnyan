@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Security.Cryptography.X509Certificates;
-using static Shared.LegacySharedValues;
 
-namespace VRnyan {
-    public class SharedValues {
+namespace Shared {
+    public class LegacySharedValues {
         public const string PluginName = "VRnyan";
-        public const string Author = Shared.LegacySharedValues.Author;
-        public const string Website = Shared.LegacySharedValues.Website;
+        public const string Author = "LumKitty";
+        public const string Website = "https://lum.uk/";
+        //public const string Version = "v1.3a2";
         public const string ProtocolVersion = "v1.1";
         public const string MMFname = "uk.lum.livnyan.cameradata." + ProtocolVersion;
-        public const int MMFSize = (sizeof(float) * 12) + 2 * sizeof(int);
+        public const int MMFSize = 9 * sizeof(float);
 
         public const int CAMENABLED = 0x1;
         public const int LOGENABLED = 0x2;
         public const int LOGSPAMENABLED = 0x4;
-        public const int OATREADCLIPPLANEPOS = 0x8;
 
         public const long MMFPos_CamPosX = 0;
         public const long MMFPos_CamPosY = 1 * sizeof(float);
@@ -25,12 +24,5 @@ namespace VRnyan {
         public const long MMFPos_CamRotZ = 6 * sizeof(float);
         public const long MMFPos_CamFOV = 7 * sizeof(float);
         public const long MMFPos_Settings = 8 * sizeof(float);
-        // Only used by OnAirTap. Ignored by LIV camera plugin
-        public const long MMFPos_ResX = 8 * sizeof(float) + 1 * sizeof(int);
-        public const long MMFPos_ResY = 8 * sizeof(float) + 2 * sizeof(int);
-        public const long MMFPos_ClipPosX = 9 * sizeof(float) + 2 * sizeof(int);
-        public const long MMFPos_ClipPosY = 10 * sizeof(float) + 2 * sizeof(int);
-        public const long MMFPos_ClipPosZ = 11 * sizeof(float) + 2 * sizeof(int);
     }
 }
-
