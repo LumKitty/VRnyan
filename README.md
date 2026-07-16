@@ -1,10 +1,10 @@
 ## VRnyan - A camera sync plugin for VNyan and VR Mixed reality (formerly LIVnyan)
 Syncs your VNyan camera over to OnAirTap, or LIV mixed reality  
-Allows VNyan to be your VTuber renderer allowing for high quality models and full redeem support - no more VRMs or separate models  
+Allows VNyan to be your VTuber renderer in various VR games, allowing for high quality models and full redeem support - no more VRMs or separate models  
 
 Please read these instructions carefully before trying to set this up!
 
-<img width="739" height="687" alt="image" src="https://github.com/user-attachments/assets/fd3f06aa-c5dc-40f6-a8c5-22af1a10fa53" />
+<img width="1105" height="616" alt="image" src="https://github.com/user-attachments/assets/0ed3372c-862c-47e1-800b-8a793e3ccfea" />
 
 ## Overview
 It is important to understand how this plugin works. Normally LIV will split the VR scene into effectively three image layers, background, glow and foreground. It will then build up a composite image: Background, VRM avatar, glow layer and foreground. This setup works by capturing each layer separately, and compositing them in OBS, with VNyan inserted between them, which requires OBS knowledge and a one-time initial setup
@@ -29,9 +29,25 @@ It is important to understand how this plugin works. Normally LIV will split the
   * Understanding of OBS filters
   * Understanding of the Windows filesystem, DLL files, JSON files etc.
 
-# Installation
+# OnAirTap vs LIV
+While this project was originally (ab)using LIV for its aims, it is now focussing on OnAirTap which has more features and is designed for VTubers. It is, however, still fully backwards-compatible with LIV so you can use either, or both (but not both simultaneously)  
 
-If you will be using VRnyan with LIV as opposed to OnAirTap, see the [old readme](https://github.com/LumKitty/VRnyan/blob/75c16d1740194ccde33a34325ea701e50ad6b1f8/README.md)
+OnAirTap advantages:
+* Can render at any resolution, including non-16:9 resolutions, unlike LIV which has a limited selection
+* Camera position and screen size are automatically synced from VNyan in realtime
+* Spout2 output is faster, more efficient, and doesn't require a window open
+* Loads as a unity mod, no external app required
+* Linux support (requires Spout2PW, and a way to get VR tracking into VNyan)
+* Foreground / background split can be dynamic, based on e.g. the position of your VTuber hip bone
+* Rendering can be tweaked in great detail (some may see this is as a disadvantage, however)
+* Once initial config is done, stream startup requires fewer separate apps compared to LIV
+
+LIV advantages:
+* Wider game compatability due to not needing to support every different Unity mod loader ever made
+* Has been around a lot longer, more documentation, more well-known
+* The only officially supported app for using the LIV API in games. Game devs are unlikely to be interested in fixing any OnAirTap-specific issues
+
+# Installation
 
 ## VNyan plugin installation
 * Ensure that plugins are enabled in VNyan (Settings -> Misc -> Additional Settings - Allow 3rd party mods)
@@ -57,6 +73,9 @@ If you will be using VRnyan with LIV as opposed to OnAirTap, see the [old readme
 * Install the mod by unpacking it to your Beat Saber directory. If installed correctly, you should have OnAirTap.dll in the plugins directory, and OAT_KlakSpout.dll in Beat Saber_Data\Plugins\x86_64
 * Start the game once and quit
 * The config file is located in UserData\OnAirTap.json
+
+# Configuration - LIV
+If you will be using LIV, see the [old readme](https://github.com/LumKitty/VRnyan/blob/75c16d1740194ccde33a34325ea701e50ad6b1f8/README.md), otherwise continue below
 
 # Configuration - VNyan
 Edit VRnyan.cfg and set the following:
@@ -125,11 +144,6 @@ The end result should look like this: (3-pass setup shown)
 The FG layer advanced mask config should look like this:
 <img width="1090" height="859" alt="image" src="https://github.com/user-attachments/assets/08c96e61-891d-496e-a917-560ad72f4084" />
 
-## Notes on calibration
-Many VRoid models have their arms too short. The closer your model matches your IRL height and proportions the less likely you are to have weapons fly away from your hand when your arms are outstretched. Elbow IK should also work better.  
-For games that don't show objects/weapons in your hand, these calibration issues will be less noticible.  
-The zoom out effect is because VNyan uses a "physical camera" setting that emulates the distortion curved lens of an IRL camera to give a more natural look. LIV does not do this and cannot easily be changed. While this could theoretically be changed in OnAirTap, generally games look better without it, and different versions of Unity may behave differently
-
 ## Use in VNyan
 Clicking the plugin button toggles the system on and off. While it is off in VNyan, OnAirTap will not render any spout frames, therefore it is not necessary to remove OnAirTap when not streaming  
 ### Triggers:  
@@ -181,12 +195,16 @@ Settings are stored in VRnyan.cfg inside your VNyan profile directory (default %
 %USERPROFILE%\Documents\LIV\Plugins\CameraBehaviours\LIVnyan.log  
 ```LogSpam``` - Both plugins will log sent/recieved camera position, rotation & FOV, plus settings info every single frame.  
 These logs will get very big very quickly. Only enable this for troubleshooting!  
-```CursedCamera``` - Adds a delay to all camera movements in VNyan, while still updating LIV in realtime. Fixes the issue during fast pans where your model moves ahead of the VR world. See the Advanced Timing section before changing this option
+```CursedCamera``` - Adds a delay to all camera movements in VNyan, while still updating LIV in realtime. Fixes the issue during fast pans where your model moves ahead of the VR world. See the Advanced Timing section before changing this option  
 ```BoneClip``` - Will instruct OnAirTap to use the specified bone for determining where the split between foreground and background is. This allows you to correctly pass in front or behind objects, even in large VR spaces. Must be a bone from [this list](https://docs.unity3d.com/ScriptReference/HumanBodyBones.html) and is case sensitive  
-```BoneClipDistanceAdjust``` - Add this value (in meters) to the bone position. Negative numbers will be closer to the camera. Generally you will want to set this to the radius of your model's pelvis so that clipping lines up with your bum
+```BoneClipDistanceAdjust``` - Add this value (in meters) to the bone position. Negative numbers will be closer to the camera. Generally you will want to set this to the radius of your model's pelvis so that clipping lines up with your bum  
 ```BoneClipDistanceAdjust2DOnly``` - If true then the vertical position of the camera will not be considered, only front/back and side to side, generally this is what you want
 
-## Alignment timing
+## Dynamic clip adjustment
+The best way to describe this, imagine the 3D world of your game were sliced in half directly in front of the camera, and then the video feed from VNyan is inserted into this slice. Whether you appear in front or behind an object depends on exactly where this slice is, normally this is static. With dynamic clip adjustment configured, as you move around inside VNyan this slice position will be updated every frame, meaning you will always correctly appear in front of or behind objects in your game world. To do this we need to send position information over to OnAirTap. The settings that control this are the BoneClip options.  
+The BoneClip settings tells VRnyan which bone to read position from, typically you will want to use hips, however the bone is inside your body so you will want to adjust it slightly towards the camera, with a little overhead for e.g. walking animations. -0.15 is a good starting value
+
+## Alignment
 Because this setup is merging two separate video feeds from two different sources, there is going to be some manual sync needed to get the best results.  
 I recommend using a game where you are always holding an object, such as Beat Saber, and recording these tests using OBS
 ### Aligning hands to weapons
@@ -204,14 +222,14 @@ call ```_lum_vr_enable``` passing this result into value1 and move the camera ag
 Once you have the final value, close VNyan, edit VRnyan.cfg and set Cursed camera there to make the change permanent 
 Remember that if you change the render delay, you will also need to adjust the Cursed Camera latency by an equivalent amount  
 My personal setting is 100 for LIV, 72 for OAT. Again YMMV
+### Other alignment considerations
+Many VRoid models have their arms too short. The closer your model matches your IRL height and proportions the less likely you are to have weapons fly away from your hand when your arms are outstretched. Elbow IK should also work better.  
+For games that don't show objects/weapons in your hand, these calibration issues will be less noticible.  
+The zoom out effect is because VNyan uses a "physical camera" setting that emulates the distortion curved lens of an IRL camera to give a more natural look. LIV does not do this and cannot easily be changed. While this could theoretically be changed in OnAirTap, generally games look better without it, and different versions of Unity may behave differently
 
-## Dynamic clip adjustment
-The best way to describe this, imagine the 3D world of your game were sliced in half directly in front of the camera, and then the video feed from VNyan is inserted into this slice. Whether you appear in front or behind an object depends on exactly where this slice is, normally this is static. With dynamic clip adjustment configured, as you move around inside VNyan this slice position will be updated every frame, meaning you will always correctly appear in front of or behind objects in your game world. To do this we need to send position information over to OnAirTap. The settings that control this are the BoneClip options.  
-The BoneClip settings tells VRnyan which bone to read position from, typically you will want to use hips, however the bone is inside your body so you will want to adjust it slightly towards the camera, with a little overhead for e.g. walking animations. -0.15 is a good starting value
+# Support
+Either open an issue here (preferred), or ask in the VRnyan thread on [Suvi's Discord](https://discord.com/channels/714814460010823690/1373846127975207002)
 
-## Support
-Either open an issue here (preferred), or ask in the LIVnyan thread on [Suvi's Discord](https://discord.com/channels/714814460010823690/1373846127975207002)
-
-## Shameless plug
+# Shameless plug
 ### https://twitch.tv/LumKitty
 If you find this plugin useful, please consider sending a follow or a raid my way. If you somehow make millions using it, consider sharing some of that with me :3
