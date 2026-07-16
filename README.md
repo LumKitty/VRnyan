@@ -64,7 +64,7 @@ LIV advantages:
 ## OnAirTap installation - BepInEx
 * Download the latest version of [OnAirTap](https://github.com/milkydelta/OnAirTap) - Get the OpenBrush build
 * Install the latest version of [BepInEx](https://github.com/bepinex/bepinex) following its instructions
-* Install the mod by unpacking the OpenBrush build. If you are attempting to use this with a different game you will need to use a different directory for OAT_KlakSpout.dll instead of OpenBrush_Data. Typically it will be GameName_Data
+* Install the mod by unpacking the OpenBrush build. If you are attempting to use this with a different game you will need to use a different directory for OAT_KlakSpout.dll instead of OpenBrush_Data. Typically it will be GameName_Data\Plugins\x86_64
 * Start the game once and quit
 * The config file is located in: <GAMEDIR>\BepInEx\config\OnAirTap.cfg
 
