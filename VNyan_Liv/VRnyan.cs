@@ -35,9 +35,11 @@ namespace VRnyan {
         private static float[] CamData = new float[9];
         
         private static MemoryMappedViewAccessor mmfAccess = null;
-        internal static GameObject objVRnyan;
+        private static GameObject objVRnyan = new GameObject("VRnyan", typeof(VRnyan));
 
         private static List<CameraTransform> CursedCamera = new List<CameraTransform>();
+
+        internal static bool IsActive => objVRnyan.activeSelf;
 
         internal static void SetActive(bool Active) {
             if (Active && !objVRnyan.activeSelf) {

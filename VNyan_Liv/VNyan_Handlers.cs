@@ -8,7 +8,7 @@ using static VRnyan.Settings;
 
 namespace VRnyan {
     public class VNyan_Handlers : IVNyanPluginManifest, IButtonClickedHandler, ITriggerHandler {
-        private const string VersionString = "2.1-alpha1";
+        private const string VersionString = "2.1-RC1";
         public string PluginName { get; } = SharedValues.PluginName;
         public string Version { get; } = VersionString;
         public string Title { get; } = SharedValues.PluginName + " " + VersionString;
@@ -30,8 +30,8 @@ namespace VRnyan {
                     VNyanInterface.VNyanInterface.VNyanUI.registerPluginButton("VRnyan", this);
                 }
 
-                Log("Spawning gameobject: VRnyan");
-                VRnyan.objVRnyan = new GameObject("VRnyan", typeof(VRnyan));
+                //Log("Spawning gameobject: VRnyan");
+                //VRnyan.objVRnyan = new GameObject("VRnyan", typeof(VRnyan));
                 //objVRnyan.SetActive(false);
                 Log("Register trigger listener");
                 VNyanInterface.VNyanInterface.VNyanTrigger.registerTriggerListener(this);
@@ -52,7 +52,7 @@ namespace VRnyan {
 
         public void pluginButtonClicked() {
             Log("Plugin button clicked");
-            VRnyan.SetActive(!VRnyan.objVRnyan.activeInHierarchy);
+            VRnyan.SetActive(!VRnyan.IsActive);
             Log("Enabled: " + ((VNyanSettings & SharedValues.CAMENABLED) != 0).ToString());
             return;
         }
