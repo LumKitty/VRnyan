@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.UIElements;
 using VNyanInterface;
+using static VRnyan.Functions;
 
 namespace VRnyan {
     [DefaultExecutionOrder(15000)]
@@ -29,7 +30,7 @@ namespace VRnyan {
     }
     
     public class VRnyan : MonoBehaviour, IVNyanPluginManifest, IButtonClickedHandler, ITriggerHandler {
-        private const string VersionString = "2.0-RC1";
+        private const string VersionString = "2.1-alpha1";
         public string PluginName { get; } = SharedValues.PluginName;
         public string Version { get; } = VersionString;
         public string Title { get; } = SharedValues.PluginName+" "+VersionString;
@@ -40,26 +41,22 @@ namespace VRnyan {
         private readonly string SettingsFileName = VNyanInterface.VNyanInterface.VNyanSettings.getProfilePath() + "\\VRnyan.cfg";
 
         private static float[] CamData = new float[9];
-        private static MemoryMappedFile mmf = null;
-        private static MemoryMappedViewAccessor mmfAccess;
-        private static int VNyanSettings = 2;
+        
+        private static MemoryMappedViewAccessor mmfAccess = null;
+        internal static int VNyanSettings = 2;
         private static GameObject objVRnyan;
         private static uint CursedCameraDelay = 0;
         private static HumanBodyBones? BoneClip = HumanBodyBones.Hips;   //_lum_liv_BoneClip
         private static float BoneClipDistanceAdjust = 0;                 //_lum_liv_BoneClipDistanceAdjust
         private static bool BoneClipDistanceAdjust2DOnly = true;
+        internal static char LinuxRootDriveLetter;
+
         private static List<CameraTransform> CursedCamera = new List<CameraTransform>();
 
 
-        private void ErrorHandler(Exception e) {
+        private static void ErrorHandler(Exception e) {
             VNyanInterface.VNyanInterface.VNyanParameter.setVNyanParameterString("_lum_liv_err", e.ToString());
             UnityEngine.Debug.Log("[VRnyan] ERR:" + e.ToString());
-        }
-
-        private void Log(string message) {
-            if ((VNyanSettings & SharedValues.LOGENABLED) != 0) {
-                UnityEngine.Debug.Log("[VRnyan] " + message);
-            }
         }
 
         public void InitializePlugin() {
@@ -79,17 +76,18 @@ namespace VRnyan {
 
                 Log("Spawning gameobject: VRnyan");
                 objVRnyan = new GameObject("VRnyan", typeof(VRnyan));
-                objVRnyan.SetActive(false);
+                //objVRnyan.SetActive(false);
                 Log("Register trigger listener");
                 VNyanInterface.VNyanInterface.VNyanTrigger.registerTriggerListener(this);
                 
                 
                 LoadPluginSettings();
-                objVRnyan.SetActive((VNyanSettings & SharedValues.CAMENABLED) != 0);
-                InitialiseMMF();
-                Log("Window size set to to: " + Screen.width.ToString() + "," + Screen.height.ToString());
-                mmfAccess.Write(SharedValues.MMFPos_ResX, Screen.width);
-                mmfAccess.Write(SharedValues.MMFPos_ResY, Screen.height);
+                SetActive(((VNyanSettings & SharedValues.CAMENABLED) != 0));
+                //objVRnyan.SetActive((VNyanSettings & SharedValues.CAMENABLED) != 0);
+                //mmfAccess = MMF_Windows.InitialiseMMF();
+                //Log("Window size set to to: " + Screen.width.ToString() + "," + Screen.height.ToString());
+                //mmfAccess.Write(SharedValues.MMFPos_ResX, Screen.width);
+                //mmfAccess.Write(SharedValues.MMFPos_ResY, Screen.height);
             } catch (Exception e) {
                 ErrorHandler(e);
             }
@@ -198,7 +196,19 @@ namespace VRnyan {
                         Log("Bone Clip Distance Adjustment (2D Only) setting missing, defaulting to 2D");
                         SettingMissing = true;
                     }
-
+                    if (settings.TryGetValue("LinuxRootDriveLetter", out tempSetting)) {
+                        if (char.TryParse(tempSetting.ToLower(), out LinuxRootDriveLetter)) {
+                            Log("Linux root drive letter: " + LinuxRootDriveLetter);
+                        } else {
+                            Log("Linux root drive letter setting invalid, defaulting to Z");
+                            LinuxRootDriveLetter = 'Z';
+                            SettingMissing = true;
+                        }
+                    } else {
+                        Log("Linux root drive letter setting missing, defaulting to Z");
+                        LinuxRootDriveLetter = 'Z';
+                        SettingMissing = true;
+                    }
 
                 } else {
                     Log("No settings file detected, using defaults");
@@ -232,19 +242,19 @@ namespace VRnyan {
             Log("Enabled: " + ((VNyanSettings & SharedValues.CAMENABLED) != 0).ToString());
         }
         
-        private void InitialiseMMF() {
-            if (mmf == null) {
-                Log("Creating file");
-                mmf = MemoryMappedFile.CreateOrOpen(SharedValues.MMFname, SharedValues.MMFSize);
-                Log("Creating accessor");
-                mmfAccess = mmf.CreateViewAccessor(0, SharedValues.MMFSize);
-            }
-        }
+        
 
         private void SetActive(bool Active) {
-            if (Active) {
-                Log("Initialise MMF");
-                InitialiseMMF();
+            if (Active && !objVRnyan.activeSelf) {
+                if (mmfAccess == null) {
+                    if (IsWine() && (LinuxRootDriveLetter >= 'a') && (LinuxRootDriveLetter <= 'z')) {
+                        Log("Initialise MMF - Wine/Linux shared memory");
+                        mmfAccess = MMF_Wine.InitialiseMMF();
+                    } else {
+                        Log("Initialise MMF - Windows shared memory");
+                        mmfAccess = MMF_Windows.InitialiseMMF();
+                    }
+                }
                 Log("Update Settings");
                 VNyanSettings = VNyanSettings | SharedValues.CAMENABLED;
                 Log("Write settings to MMF");
@@ -253,11 +263,11 @@ namespace VRnyan {
                 objVRnyan.SetActive(true);
                 Log("Disable physical camera");
                 Camera.main.usePhysicalProperties = false;
-            } else {
+            } else if (objVRnyan.activeSelf) {
                 VNyanSettings = (VNyanSettings | SharedValues.CAMENABLED) - SharedValues.CAMENABLED;
                 objVRnyan.SetActive(false);
                 CursedCamera.Clear();
-                mmfAccess.Write(SharedValues.MMFPos_Settings, VNyanSettings);
+                if (mmfAccess != null) { mmfAccess.Write(SharedValues.MMFPos_Settings, VNyanSettings); }
                 Camera.main.usePhysicalProperties = true;
             }
         }
