@@ -8,7 +8,7 @@ namespace Shared {
         public const string Website = "https://lum.uk/";
         //public const string Version = "v1.3a2";
         public const string ProtocolVersion = "v1.1";
-        public const string MMFname = "uk.lum.livnyan.cameradata." + ProtocolVersion;
+        public const string MMFname = "uk.lum.vrnyan.cameradata." + ProtocolVersion;
         public const int MMFSize = 9 * sizeof(float);
 
         public const int CAMENABLED = 0x1;

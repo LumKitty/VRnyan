@@ -7,8 +7,8 @@
     <ProjectGuid>{09F7466F-7007-49E6-BBE2-C81718554523}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>LIV_VNyan</RootNamespace>
-    <AssemblyName>LIV_VNyan</AssemblyName>
+    <RootNamespace>VRnyan.LIV</RootNamespace>
+    <AssemblyName>VRnyan-LIV</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -57,7 +57,7 @@
     <Compile Include="..\Shared\LegacySharedValues.cs">
       <Link>Properties\LegacySharedValues.cs</Link>
     </Compile>
-    <Compile Include="LIV_VNyan.cs" />
+    <Compile Include="VRnyan-LIV.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -2,4 +2,4 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("LIVnyan (LIV plugin)")]
+[assembly: AssemblyTitle("VRnyan (LIV plugin)")]
