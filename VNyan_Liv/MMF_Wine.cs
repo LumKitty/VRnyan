@@ -5,13 +5,14 @@ using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Text;
 using static VRnyan.Functions;
+using static VRnyan.Settings;
 
 namespace VRnyan {
     internal class MMF_Wine {
         private static MemoryMappedFile mmf = null;
         internal static MemoryMappedViewAccessor InitialiseMMF() {
             if (mmf == null) {
-                string PathName = $"{VRnyan.LinuxRootDriveLetter}:\\dev\\shm\\{SharedValues.MMFname}";
+                string PathName = $"{LinuxRootDriveLetter}:\\dev\\shm\\{SharedValues.MMFname}";
 
                 if (!File.Exists(PathName)) {
                     Log($"Creating file: {PathName}");
