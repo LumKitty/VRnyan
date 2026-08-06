@@ -21,6 +21,7 @@ It is important to understand how this plugin works. Normally LIV will split the
     * Understanding of how to mod your chosen game (BepInEx or BSIPA, more to come soon)
     * Your game uses the LIV 1.5 SDK (If LIV_Bridge.dll is present it should work
     * Support for LIV 2.0 SDK (LIV_Native.dll) is currently experimental (tested in Beat Saber URP beta)
+    * (Optional) [OBS ShaderFilter Plugin](https://github.com/exeldro/obs-shaderfilter) for a better & more efficient compositing method
   * LIV VR specific
     * Mixed Reality Avatar mode configured and working
     * (Optional) A VRM file with the same rigging as your VSFAvatar
