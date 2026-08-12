@@ -154,9 +154,9 @@ namespace VRnyan {
             settings["LogSpam"] = false.ToString();
             settings["CursedCamera"] = CursedCameraDelay.ToString();
             settings["BoneClip"] = BoneClip.ToString();
-            settings["BoneClipDistanceAdjust"] = BoneClipDistanceAdjust.ToString();
+            settings["BoneClipDistanceAdjust"] = BoneClipDistanceAdjust.ToString("0.00");
             settings["BoneClipDistanceAdjust2DOnly"] = BoneClipDistanceAdjust2DOnly.ToString();
-            settings["LinuxRootDriveLetter"] = LinuxRootDriveLetter.ToString();
+            settings["LinuxRootDriveLetter"] = LinuxRootDriveLetter.ToString().Trim();
             VNyanInterface.VNyanInterface.VNyanSettings.saveSettings(SettingsFileName, settings);
         }
     }

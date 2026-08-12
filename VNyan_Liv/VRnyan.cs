@@ -60,7 +60,7 @@ namespace VRnyan {
                 objVRnyan.SetActive(true);
                 Log("Disable physical camera");
                 Camera.main.usePhysicalProperties = false;
-            } else if (objVRnyan.activeSelf) {
+            } else if (!Active && objVRnyan.activeSelf) {
                 VNyanSettings = (VNyanSettings | SharedValues.CAMENABLED) - SharedValues.CAMENABLED;
                 objVRnyan.SetActive(false);
                 CursedCamera.Clear();

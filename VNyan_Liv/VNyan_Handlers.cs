@@ -8,7 +8,7 @@ using static VRnyan.Settings;
 
 namespace VRnyan {
     public class VNyan_Handlers : IVNyanPluginManifest, IButtonClickedHandler, ITriggerHandler {
-        private const string VersionString = "2.1-RC1";
+        private const string VersionString = "2.2-beta1";
         public string PluginName { get; } = SharedValues.PluginName;
         public string Version { get; } = VersionString;
         public string Title { get; } = SharedValues.PluginName + " " + VersionString;
@@ -29,7 +29,7 @@ namespace VRnyan {
                     Log("Register plugin button");
                     VNyanInterface.VNyanInterface.VNyanUI.registerPluginButton("VRnyan", this);
                 }
-
+                
                 //Log("Spawning gameobject: VRnyan");
                 //VRnyan.objVRnyan = new GameObject("VRnyan", typeof(VRnyan));
                 //objVRnyan.SetActive(false);
@@ -38,6 +38,7 @@ namespace VRnyan {
 
 
                 LoadPluginSettings();
+                VRnyan_GUI.SetActive(false);
                 VRnyan.SetActive(((VNyanSettings & SharedValues.CAMENABLED) != 0));
                 //objVRnyan.SetActive((VNyanSettings & SharedValues.CAMENABLED) != 0);
                 //mmfAccess = MMF_Windows.InitialiseMMF();
@@ -52,13 +53,15 @@ namespace VRnyan {
 
         public void pluginButtonClicked() {
             Log("Plugin button clicked");
-            VRnyan.SetActive(!VRnyan.IsActive);
+            VRnyan_GUI.ToggleActive();
+            //VRnyan.SetActive(!VRnyan.IsActive);
             Log("Enabled: " + ((VNyanSettings & SharedValues.CAMENABLED) != 0).ToString());
             return;
         }
 
         public void triggerCalled(string name, int int1, int int2, int int3, string text1, string text2, string text3) {
             try {
+                if (name == "____bottom_right_gui" && text1 != "vrnyan") { VRnyan_GUI.SetActive(false); }
                 if (name.Length > 10) {
                     name = name.ToLower();
                     if (name.Substring(0, 8) == "_lum_vr_") {
