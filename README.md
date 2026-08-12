@@ -119,7 +119,7 @@ SendOptimised = false
 BlankSendersOnRenderDispose = true
 ```
 
-## Configuration - OBS
+## Configuration - OBS - Three-pass
 You will need Spout2 and Advanced Mask installed, then:
 * Create a Spout2 capture named "OnAirTap-BG". Choose the SpoutSender "OnAirTap Background", with Composite Mode set to Opaque
 * Immediately above this, create a Spout2 capture for VNyan with Composite Mode set to default
