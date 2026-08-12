@@ -9,6 +9,7 @@ using UnityEngine;
 
 namespace VRnyan {
     public class VRnyan_GUI : MonoBehaviour {
+        internal const string CloseTriggerName = "uk.lum.vrnyan";
         private const int DWidth = 213;
         private const int DHeight = 400;
         public Camera curCam;
@@ -23,7 +24,7 @@ namespace VRnyan {
         void OnEnable() {
             CursedCameraDelay = Settings.CursedCameraDelay.ToString();
             BoneClipDistanceAdjust = Settings.BoneClipDistanceAdjust;
-            VNyanInterface.VNyanInterface.VNyanTrigger.callTrigger("____bottom_right_gui",0,0,0,"vrnyan","","");
+            VNyanInterface.VNyanInterface.VNyanTrigger.callTrigger("____bottom_right_gui",0,0,0, CloseTriggerName, "","");
         }
 
         void OnDisable() {

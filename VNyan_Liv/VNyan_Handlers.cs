@@ -61,7 +61,7 @@ namespace VRnyan {
 
         public void triggerCalled(string name, int int1, int int2, int int3, string text1, string text2, string text3) {
             try {
-                if (name == "____bottom_right_gui" && text1 != "uk.lum.vrnyan") { VRnyan_GUI.SetActive(false); }
+                if (name == "____bottom_right_gui" && text1 != VRnyan_GUI.CloseTriggerName) { VRnyan_GUI.SetActive(false); }
                 if (name.Length > 10) {
                     name = name.ToLower();
                     if (name.Substring(0, 8) == "_lum_vr_") {
