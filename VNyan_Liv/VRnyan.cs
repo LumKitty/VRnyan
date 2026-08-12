@@ -34,7 +34,7 @@ namespace VRnyan {
 
         private static float[] CamData = new float[9];
         
-        private static MemoryMappedViewAccessor mmfAccess = null;
+        internal static MemoryMappedViewAccessor mmfAccess = null;
         private static GameObject objVRnyan = new GameObject("VRnyan", typeof(VRnyan));
 
         private static List<CameraTransform> CursedCamera = new List<CameraTransform>();

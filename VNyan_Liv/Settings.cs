@@ -84,8 +84,10 @@ namespace VRnyan {
                     }
                     if (settings.TryGetValue("BoneClip", out tempSetting)) {
                         HumanBodyBones TempBoneClip;
-
-                        if (Enum.TryParse<HumanBodyBones>(tempSetting, out TempBoneClip)) {
+                        if (String.IsNullOrEmpty(tempSetting)) {
+                            BoneClip = null;
+                            Log("Clipping bone tracker disabled");
+                        } else if (Enum.TryParse<HumanBodyBones>(tempSetting, out TempBoneClip)) {
                             BoneClip = TempBoneClip;
                             tempVNyanSettings += SharedValues.OATREADCLIPPLANEPOS;
                             Log("Clipping bone tracker set to: " + TempBoneClip.ToString());

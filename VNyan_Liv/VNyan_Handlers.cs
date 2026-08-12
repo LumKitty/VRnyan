@@ -8,7 +8,7 @@ using static VRnyan.Settings;
 
 namespace VRnyan {
     public class VNyan_Handlers : IVNyanPluginManifest, IButtonClickedHandler, ITriggerHandler {
-        private const string VersionString = "2.2-beta1";
+        private const string VersionString = "2.2-beta2";
         public string PluginName { get; } = SharedValues.PluginName;
         public string Version { get; } = VersionString;
         public string Title { get; } = SharedValues.PluginName + " " + VersionString;
@@ -61,7 +61,7 @@ namespace VRnyan {
 
         public void triggerCalled(string name, int int1, int int2, int int3, string text1, string text2, string text3) {
             try {
-                if (name == "____bottom_right_gui" && text1 != VRnyan_GUI.CloseTriggerName) { VRnyan_GUI.SetActive(false); }
+                if (name == VRnyan_GUI.CloseTriggerName && text1 != VRnyan_GUI.CloseTriggerValue) { VRnyan_GUI.SetActive(false); }
                 if (name.Length > 10) {
                     name = name.ToLower();
                     if (name.Substring(0, 8) == "_lum_vr_") {
