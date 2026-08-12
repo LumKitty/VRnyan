@@ -12,7 +12,6 @@ namespace VRnyan {
         internal const string CloseTriggerName = "uk.lum.vrnyan";
         private const int DWidth = 213;
         private const int DHeight = 400;
-        public Camera curCam;
         private static GameObject objVRnyan_GUI = new GameObject("VRnyan_GUI", typeof(VRnyan_GUI));
 
         private string CursedCameraDelay;
