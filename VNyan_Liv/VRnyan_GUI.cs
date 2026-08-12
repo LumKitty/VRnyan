@@ -36,8 +36,8 @@ namespace VRnyan {
             if (VRnyan.IsActive) { GUILayout.Label("VRnyan - Active"); } else { GUILayout.Label("VRnyan - Inactive");  }
             
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Activate")) { VRnyan.SetActive(true); }
-            if (GUILayout.Button("Deactivate")) { VRnyan.SetActive(false); }
+            if (GUILayout.Button("Activate"))   { VRnyan.SetActive(true);  SetActive(false); }
+            if (GUILayout.Button("Deactivate")) { VRnyan.SetActive(false); SetActive(false); }
             GUILayout.EndHorizontal();
             
             GUILayout.BeginHorizontal();
