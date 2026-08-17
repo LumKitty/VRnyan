@@ -78,15 +78,34 @@ namespace VRnyan {
         }
 
         public void LateUpdate() {
+            Vector3 CamPos;
+            Quaternion CamRot;
             try {
+                if (VNyanInterface.VNyanInterface.VNyanParameter.getVNyanParameterFloat("_lum_followcam_enabled") > 0.5) {
+                    CamPos = new Vector3(
+                        VNyanInterface.VNyanInterface.VNyanParameter.getVNyanParameterFloat("_lum_followcam_camx"),
+                        VNyanInterface.VNyanInterface.VNyanParameter.getVNyanParameterFloat("_lum_followcam_camy"),
+                        VNyanInterface.VNyanInterface.VNyanParameter.getVNyanParameterFloat("_lum_followcam_camz")
+                    );
+                    CamRot = new Quaternion(
+                        VNyanInterface.VNyanInterface.VNyanParameter.getVNyanParameterFloat("_lum_followcam_rotx"),
+                        VNyanInterface.VNyanInterface.VNyanParameter.getVNyanParameterFloat("_lum_followcam_roty"),
+                        VNyanInterface.VNyanInterface.VNyanParameter.getVNyanParameterFloat("_lum_followcam_rotz"),
+                        VNyanInterface.VNyanInterface.VNyanParameter.getVNyanParameterFloat("_lum_followcam_rotw")
+                    );
+                } else {
+                    CamPos = Camera.main.transform.position;
+                    CamRot = Camera.main.transform.rotation;
+                }
+
                 // var camera = Camera.main;
-                mmfAccess.Write(SharedValues.MMFPos_CamPosX, Camera.main.transform.position.x);
-                mmfAccess.Write(SharedValues.MMFPos_CamPosY, Camera.main.transform.position.y);
-                mmfAccess.Write(SharedValues.MMFPos_CamPosZ, Camera.main.transform.position.z);
-                mmfAccess.Write(SharedValues.MMFPos_CamRotW, Camera.main.transform.rotation.w);
-                mmfAccess.Write(SharedValues.MMFPos_CamRotX, Camera.main.transform.rotation.x);
-                mmfAccess.Write(SharedValues.MMFPos_CamRotY, Camera.main.transform.rotation.y);
-                mmfAccess.Write(SharedValues.MMFPos_CamRotZ, Camera.main.transform.rotation.z);
+                mmfAccess.Write(SharedValues.MMFPos_CamPosX, CamPos.x);
+                mmfAccess.Write(SharedValues.MMFPos_CamPosY, CamPos.y);
+                mmfAccess.Write(SharedValues.MMFPos_CamPosZ, CamPos.z);
+                mmfAccess.Write(SharedValues.MMFPos_CamRotW, CamRot.w);
+                mmfAccess.Write(SharedValues.MMFPos_CamRotX, CamRot.x);
+                mmfAccess.Write(SharedValues.MMFPos_CamRotY, CamRot.y);
+                mmfAccess.Write(SharedValues.MMFPos_CamRotZ, CamRot.z);
                 mmfAccess.Write(SharedValues.MMFPos_CamFOV,  Camera.main.fieldOfView);
                 
                 // Only used by OnAirTap. Ignored by LIV_VNyan.dll
@@ -99,7 +118,7 @@ namespace VRnyan {
                     Transform BoneTransform = AvatarAnimator.GetBoneTransform((HumanBodyBones)BoneClip);
 
                     if (BoneClipDistanceAdjust != 0) {
-                        Vector3 AdjustmentVector3D = BoneTransform.position - Camera.main.transform.position;
+                        Vector3 AdjustmentVector3D = BoneTransform.position - CamPos;
                         if (BoneClipDistanceAdjust2DOnly) {
                             AdjustmentVector3D.y = 0;
                         }
@@ -139,7 +158,7 @@ namespace VRnyan {
                     FramesElapsed++;*/
                 }
                 if (CursedCameraDelay > 0) {
-                    CursedCamera.Add(new CameraTransform(Camera.main.transform.position, Camera.main.transform.rotation, DateTime.UtcNow.AddMilliseconds(CursedCameraDelay)));
+                    CursedCamera.Add(new CameraTransform(CamPos, CamRot, DateTime.UtcNow.AddMilliseconds(CursedCameraDelay)));
                     //Log("New Frame");
                     int Count = CursedCamera.Count;
                     //Log("0/" + Count.ToString());
