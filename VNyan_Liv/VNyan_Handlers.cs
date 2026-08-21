@@ -8,7 +8,7 @@ using static VRnyan.Settings;
 
 namespace VRnyan {
     public class VNyan_Handlers : IVNyanPluginManifest, IButtonClickedHandler, ITriggerHandler {
-        private const string VersionString = "2.3-beta1";
+        private const string VersionString = "2.3-beta2";
         public string PluginName { get; } = SharedValues.PluginName;
         public string Version { get; } = VersionString;
         public string Title { get; } = SharedValues.PluginName + " " + VersionString;
@@ -36,10 +36,16 @@ namespace VRnyan {
                 Log("Register trigger listener");
                 VNyanInterface.VNyanInterface.VNyanTrigger.registerTriggerListener(this);
 
-
+                VRnyan.SetActive(false);
                 LoadPluginSettings();
                 VRnyan_GUI.SetActive(false);
-                VRnyan.SetActive(((VNyanSettings & SharedValues.CAMENABLED) != 0));
+                
+                Log($"VNyanSettings: {VNyanSettings}");
+                if ((VNyanSettings & SharedValues.CAMENABLED) != 0) {
+                    Log("Starting VRnyan at launch");
+                    VRnyan.SetActive(true);
+                }
+                    
                 //objVRnyan.SetActive((VNyanSettings & SharedValues.CAMENABLED) != 0);
                 //mmfAccess = MMF_Windows.InitialiseMMF();
                 //Log("Window size set to to: " + Screen.width.ToString() + "," + Screen.height.ToString());
