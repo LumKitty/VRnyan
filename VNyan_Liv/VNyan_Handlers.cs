@@ -15,6 +15,9 @@ namespace VRnyan {
         public string Author { get; } = SharedValues.Author;
         public string Website { get; } = SharedValues.Website;
 
+        static System.Reflection.MethodInfo _GetFollowCamPos;
+        static System.Reflection.MethodInfo _GetFollowCamRot;
+
         public void InitializePlugin() {
             try {
                 Log("VRNyan version " + Version + " started");
@@ -45,7 +48,29 @@ namespace VRnyan {
                     Log("Starting VRnyan at launch");
                     VRnyan.SetActive(true);
                 }
-                    
+
+                var type = Type.GetType("VNyan_FollowCam.FollowCam, VNyan-FollowCam", throwOnError: false);
+
+                if (type != null) {
+                    Log("Found VNyan followcam, getting methods");
+                    _GetFollowCamPos = type.GetMethod("GetMainCameraPos");
+                    _GetFollowCamRot = type.GetMethod("GetMainCameraRot");
+                    if (_GetFollowCamPos == null || _GetFollowCamRot == null) {
+                        Log("Couldn't find position methods");
+                    } else {
+                        Log("Got methods, testing...");
+                        //Vector3 TestPos = (Vector3)_GetFollowCamPos?.Invoke(null, null);
+                        //Quaternion TestRot = (Quaternion)_GetFollowCamRot?.Invoke(null, null);
+                        Log(GetFollowCamPos().ToString());
+                        Log(GetFollowCamRot().eulerAngles.ToString());
+                    }
+
+                } else {
+                    Log("Did not find followcam assembly");
+                    // Plugin assembly/type not available
+                }
+
+
                 //objVRnyan.SetActive((VNyanSettings & SharedValues.CAMENABLED) != 0);
                 //mmfAccess = MMF_Windows.InitialiseMMF();
                 //Log("Window size set to to: " + Screen.width.ToString() + "," + Screen.height.ToString());
@@ -56,6 +81,12 @@ namespace VRnyan {
             }
         }
 
+        internal static Vector3 GetFollowCamPos() {
+            return (Vector3)_GetFollowCamPos?.Invoke(null, null);
+        }
+        internal static Quaternion GetFollowCamRot() {
+            return (Quaternion)_GetFollowCamRot?.Invoke(null, null);
+        }
 
         public void pluginButtonClicked() {
             Log("Plugin button clicked");

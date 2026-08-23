@@ -78,11 +78,12 @@ namespace VRnyan {
         }
 
         public void LateUpdate() {
+            
             Vector3 CamPos;
             Quaternion CamRot;
             try {
                 if (VNyanInterface.VNyanInterface.VNyanParameter.getVNyanParameterFloat("_lum_followcam_enabled") > 0.5) {
-                    CamPos = new Vector3(
+                    /*CamPos = new Vector3(
                         VNyanInterface.VNyanInterface.VNyanParameter.getVNyanParameterFloat("_lum_followcam_camx"),
                         VNyanInterface.VNyanInterface.VNyanParameter.getVNyanParameterFloat("_lum_followcam_camy"),
                         VNyanInterface.VNyanInterface.VNyanParameter.getVNyanParameterFloat("_lum_followcam_camz")
@@ -92,7 +93,10 @@ namespace VRnyan {
                         VNyanInterface.VNyanInterface.VNyanParameter.getVNyanParameterFloat("_lum_followcam_roty"),
                         VNyanInterface.VNyanInterface.VNyanParameter.getVNyanParameterFloat("_lum_followcam_rotz"),
                         VNyanInterface.VNyanInterface.VNyanParameter.getVNyanParameterFloat("_lum_followcam_rotw")
-                    );
+                    );*/
+                    CamPos = VNyan_Handlers.GetFollowCamPos();
+                    CamRot = VNyan_Handlers.GetFollowCamRot();
+
                 } else {
                     CamPos = Camera.main.transform.position;
                     CamRot = Camera.main.transform.rotation;
