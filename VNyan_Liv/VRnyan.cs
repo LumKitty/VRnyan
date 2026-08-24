@@ -32,6 +32,7 @@ namespace VRnyan {
     
     public class VRnyan : MonoBehaviour {
 
+        internal static bool FollowCamEnabled = false;
         private static float[] CamData = new float[9];
         
         internal static MemoryMappedViewAccessor mmfAccess = null;
@@ -69,7 +70,14 @@ namespace VRnyan {
             }
         }
         
-        
+        public static void EnableFollowCam() {
+            FollowCamEnabled = true;
+            Log("FollowCam enabled");
+        }
+        public static void DisableFollowCam() {
+            FollowCamEnabled = false;
+            Log("FollowCam disabled");
+        }
 
         public void OnRectTransformDimensionsChange() {
             Log("Window size changed to: " + Screen.width.ToString() + "," + Screen.height.ToString());
@@ -82,21 +90,9 @@ namespace VRnyan {
             Vector3 CamPos;
             Quaternion CamRot;
             try {
-                if (VNyanInterface.VNyanInterface.VNyanParameter.getVNyanParameterFloat("_lum_followcam_enabled") > 0.5) {
-                    /*CamPos = new Vector3(
-                        VNyanInterface.VNyanInterface.VNyanParameter.getVNyanParameterFloat("_lum_followcam_camx"),
-                        VNyanInterface.VNyanInterface.VNyanParameter.getVNyanParameterFloat("_lum_followcam_camy"),
-                        VNyanInterface.VNyanInterface.VNyanParameter.getVNyanParameterFloat("_lum_followcam_camz")
-                    );
-                    CamRot = new Quaternion(
-                        VNyanInterface.VNyanInterface.VNyanParameter.getVNyanParameterFloat("_lum_followcam_rotx"),
-                        VNyanInterface.VNyanInterface.VNyanParameter.getVNyanParameterFloat("_lum_followcam_roty"),
-                        VNyanInterface.VNyanInterface.VNyanParameter.getVNyanParameterFloat("_lum_followcam_rotz"),
-                        VNyanInterface.VNyanInterface.VNyanParameter.getVNyanParameterFloat("_lum_followcam_rotw")
-                    );*/
+                if (FollowCamEnabled) {
                     CamPos = VNyan_Handlers.GetFollowCamPos();
                     CamRot = VNyan_Handlers.GetFollowCamRot();
-
                 } else {
                     CamPos = Camera.main.transform.position;
                     CamRot = Camera.main.transform.rotation;

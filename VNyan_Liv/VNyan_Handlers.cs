@@ -15,8 +15,28 @@ namespace VRnyan {
         public string Author { get; } = SharedValues.Author;
         public string Website { get; } = SharedValues.Website;
 
-        static System.Reflection.MethodInfo _GetFollowCamPos;
-        static System.Reflection.MethodInfo _GetFollowCamRot;
+        private static System.Reflection.MethodInfo _GetFollowCamPos;
+        private static System.Reflection.MethodInfo _GetFollowCamRot;
+
+
+        internal static void ConnectFollowCam() {
+            Log("Looking for FollowCam");
+            var type = Type.GetType("VNyan_FollowCam.FollowCam, VNyan-FollowCam", throwOnError: false);
+            if (type != null) {
+                Log("Found VNyan followcam, getting methods");
+                _GetFollowCamPos = type.GetMethod("GetMainCameraPos");
+                _GetFollowCamRot = type.GetMethod("GetMainCameraRot");
+                if (_GetFollowCamPos == null || _GetFollowCamRot == null) {
+                    Log("Couldn't find position methods");
+                } else {
+                    Log("Got methods, testing...");
+                    Log(GetFollowCamPos().ToString());
+                    Log(GetFollowCamRot().eulerAngles.ToString());
+                }
+            } else {
+                Log("Did not find followcam assembly");
+            }
+        }
 
         public void InitializePlugin() {
             try {
@@ -32,7 +52,8 @@ namespace VRnyan {
                     Log("Register plugin button");
                     VNyanInterface.VNyanInterface.VNyanUI.registerPluginButton("VRnyan", this);
                 }
-                
+                ConnectFollowCam();
+
                 //Log("Spawning gameobject: VRnyan");
                 //VRnyan.objVRnyan = new GameObject("VRnyan", typeof(VRnyan));
                 //objVRnyan.SetActive(false);
@@ -48,34 +69,7 @@ namespace VRnyan {
                     Log("Starting VRnyan at launch");
                     VRnyan.SetActive(true);
                 }
-
-                var type = Type.GetType("VNyan_FollowCam.FollowCam, VNyan-FollowCam", throwOnError: false);
-
-                if (type != null) {
-                    Log("Found VNyan followcam, getting methods");
-                    _GetFollowCamPos = type.GetMethod("GetMainCameraPos");
-                    _GetFollowCamRot = type.GetMethod("GetMainCameraRot");
-                    if (_GetFollowCamPos == null || _GetFollowCamRot == null) {
-                        Log("Couldn't find position methods");
-                    } else {
-                        Log("Got methods, testing...");
-                        //Vector3 TestPos = (Vector3)_GetFollowCamPos?.Invoke(null, null);
-                        //Quaternion TestRot = (Quaternion)_GetFollowCamRot?.Invoke(null, null);
-                        Log(GetFollowCamPos().ToString());
-                        Log(GetFollowCamRot().eulerAngles.ToString());
-                    }
-
-                } else {
-                    Log("Did not find followcam assembly");
-                    // Plugin assembly/type not available
-                }
-
-
-                //objVRnyan.SetActive((VNyanSettings & SharedValues.CAMENABLED) != 0);
-                //mmfAccess = MMF_Windows.InitialiseMMF();
-                //Log("Window size set to to: " + Screen.width.ToString() + "," + Screen.height.ToString());
-                //mmfAccess.Write(SharedValues.MMFPos_ResX, Screen.width);
-                //mmfAccess.Write(SharedValues.MMFPos_ResY, Screen.height);
+                Log($"Assembly name: {typeof(VRnyan).AssemblyQualifiedName}");
             } catch (Exception e) {
                 ErrorHandler(e);
             }

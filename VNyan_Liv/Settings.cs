@@ -12,6 +12,7 @@ namespace VRnyan {
         internal static float BoneClipDistanceAdjust = 0;                 //_lum_liv_BoneClipDistanceAdjust
         internal static bool BoneClipDistanceAdjust2DOnly = true;
         internal static char LinuxRootDriveLetter;
+        internal static bool ActiveOnStart = false;
 
         private static readonly string OldSettingsFileName = VNyanInterface.VNyanInterface.VNyanSettings.getProfilePath() + "\\LIVnyan.cfg";
         private static readonly string SettingsFileName = VNyanInterface.VNyanInterface.VNyanSettings.getProfilePath() + "\\VRnyan.cfg";
@@ -40,9 +41,11 @@ namespace VRnyan {
 
                     if (settings.TryGetValue("ActiveOnStart", out tempSetting)) {
                         if (bool.Parse(tempSetting)) {
+                            ActiveOnStart = true;
                             tempVNyanSettings += SharedValues.CAMENABLED;
                             Log("Camera sync enabled on startup");
                         } else {
+                            ActiveOnStart = false;
                             Log("Camera sync disabled on startup");
                         }
                     } else {
@@ -151,7 +154,7 @@ namespace VRnyan {
 
         internal static void SavePluginSettings() {
             Dictionary<string, string> settings = new Dictionary<string, string>();
-            settings["ActiveOnStart"] = ((VNyanSettings & SharedValues.CAMENABLED) != 0).ToString();
+            settings["ActiveOnStart"] = ActiveOnStart.ToString();
             settings["LogEnabled"] = ((VNyanSettings & SharedValues.LOGENABLED) != 0).ToString();
             settings["LogSpam"] = false.ToString();
             settings["CursedCamera"] = CursedCameraDelay.ToString();
