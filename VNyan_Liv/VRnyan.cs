@@ -91,8 +91,8 @@ namespace VRnyan {
             Quaternion CamRot;
             try {
                 if (FollowCamEnabled) {
-                    CamPos = VNyan_Handlers.GetFollowCamPos();
-                    CamRot = VNyan_Handlers.GetFollowCamRot();
+                    CamPos = VNyan_Handlers.FollowCamTransform.position;
+                    CamRot = VNyan_Handlers.FollowCamTransform.rotation;
                 } else {
                     CamPos = Camera.main.transform.position;
                     CamRot = Camera.main.transform.rotation;

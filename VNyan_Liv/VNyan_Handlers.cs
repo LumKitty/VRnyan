@@ -8,30 +8,30 @@ using static VRnyan.Settings;
 
 namespace VRnyan {
     public class VNyan_Handlers : IVNyanPluginManifest, IButtonClickedHandler, ITriggerHandler {
-        private const string VersionString = "2.3-RC2";
+        private const string VersionString = "2.3-RC5";
         public string PluginName { get; } = SharedValues.PluginName;
         public string Version { get; } = VersionString;
         public string Title { get; } = SharedValues.PluginName + " " + VersionString;
         public string Author { get; } = SharedValues.Author;
         public string Website { get; } = SharedValues.Website;
 
-        private static System.Reflection.MethodInfo _GetFollowCamPos;
-        private static System.Reflection.MethodInfo _GetFollowCamRot;
-
+        //private static System.Reflection.MethodInfo _GetFollowCamTransform;
+        //private static System.Reflection.MethodInfo _GetFollowCamRot;
+        internal static Transform FollowCamTransform;
 
         internal static void ConnectFollowCam() {
             Log("Looking for FollowCam");
             var type = Type.GetType("VNyan_FollowCam.FollowCam, VNyan-FollowCam", throwOnError: false);
             if (type != null) {
                 Log("Found VNyan followcam, getting methods");
-                _GetFollowCamPos = type.GetMethod("GetMainCameraPos");
-                _GetFollowCamRot = type.GetMethod("GetMainCameraRot");
-                if (_GetFollowCamPos == null || _GetFollowCamRot == null) {
+                System.Reflection.MethodInfo GetFollowCamTransform = type.GetMethod("GetFollowCamTransform");
+                if (GetFollowCamTransform == null) {
                     Log("Couldn't find position methods");
                 } else {
+                    FollowCamTransform = (Transform)GetFollowCamTransform?.Invoke(null, new object[] { (int)0 });
                     Log("Got methods, testing...");
-                    Log(GetFollowCamPos().ToString());
-                    Log(GetFollowCamRot().eulerAngles.ToString());
+                    Log(FollowCamTransform.position.ToString());
+                    Log(FollowCamTransform.rotation.eulerAngles.ToString());
                 }
             } else {
                 Log("Did not find followcam assembly");
@@ -73,13 +73,6 @@ namespace VRnyan {
             } catch (Exception e) {
                 ErrorHandler(e);
             }
-        }
-
-        internal static Vector3 GetFollowCamPos() {
-            return (Vector3)_GetFollowCamPos?.Invoke(null, null);
-        }
-        internal static Quaternion GetFollowCamRot() {
-            return (Quaternion)_GetFollowCamRot?.Invoke(null, null);
         }
 
         public void pluginButtonClicked() {
