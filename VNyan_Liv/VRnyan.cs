@@ -70,9 +70,10 @@ namespace VRnyan {
             }
         }
         
-        public static void EnableFollowCam() {
+        public static Queue<CameraTransform> EnableFollowCam() {
             FollowCamEnabled = true;
             Log("FollowCam enabled");
+            return CursedCamera;
         }
         public static void DisableFollowCam() {
             FollowCamEnabled = false;
@@ -85,28 +86,35 @@ namespace VRnyan {
             mmfAccess.Write(SharedValues.MMFPos_ResY, Screen.height);
         }
 
+        public void UpdateMMF(Vector3 CamPos, Quaternion CamRot) {
+            mmfAccess.Write(SharedValues.MMFPos_CamPosX, CamPos.x);
+            mmfAccess.Write(SharedValues.MMFPos_CamPosY, CamPos.y);
+            mmfAccess.Write(SharedValues.MMFPos_CamPosZ, CamPos.z);
+            mmfAccess.Write(SharedValues.MMFPos_CamRotW, CamRot.w);
+            mmfAccess.Write(SharedValues.MMFPos_CamRotX, CamRot.x);
+            mmfAccess.Write(SharedValues.MMFPos_CamRotY, CamRot.y);
+            mmfAccess.Write(SharedValues.MMFPos_CamRotZ, CamRot.z);
+            mmfAccess.Write(SharedValues.MMFPos_CamFOV,  Camera.main.fieldOfView);
+        }
+        
         public void LateUpdate() {
             
             Vector3 CamPos;
             Quaternion CamRot;
             try {
-                if (FollowCamEnabled) {
-                    CamPos = VNyan_Handlers.FollowCamTransform.position;
-                    CamRot = VNyan_Handlers.FollowCamTransform.rotation;
-                } else {
+                if (!FollowCamEnabled) {
                     CamPos = Camera.main.transform.position;
                     CamRot = Camera.main.transform.rotation;
+                    UpdateMMF(CamPos, CamRot);
+                } else {
+                    CameraTransform DesiredPos = CursedCamera.Peek();
+                    CamPos = DesiredPos.Position;
+                    CamRot = DesiredPos.Rotation;
                 }
 
-                // var camera = Camera.main;
-                mmfAccess.Write(SharedValues.MMFPos_CamPosX, CamPos.x);
-                mmfAccess.Write(SharedValues.MMFPos_CamPosY, CamPos.y);
-                mmfAccess.Write(SharedValues.MMFPos_CamPosZ, CamPos.z);
-                mmfAccess.Write(SharedValues.MMFPos_CamRotW, CamRot.w);
-                mmfAccess.Write(SharedValues.MMFPos_CamRotX, CamRot.x);
-                mmfAccess.Write(SharedValues.MMFPos_CamRotY, CamRot.y);
-                mmfAccess.Write(SharedValues.MMFPos_CamRotZ, CamRot.z);
-                mmfAccess.Write(SharedValues.MMFPos_CamFOV,  Camera.main.fieldOfView);
+                
+                    // var camera = Camera.main;
+                
                 
                 // Only used by OnAirTap. Ignored by LIV_VNyan.dll
                 mmfAccess.Write(SharedValues.MMFPos_ResX, Screen.width);
@@ -158,14 +166,9 @@ namespace VRnyan {
                     FramesElapsed++;*/
                 //}
                 if (CursedCameraDelay > 0) {
-                    CursedCamera.Enqueue(new CameraTransform(CamPos, CamRot, DateTime.UtcNow.AddMilliseconds(CursedCameraDelay)));
+                    if (!FollowCamEnabled) { CursedCamera.Enqueue(new CameraTransform(CamPos, CamRot, DateTime.UtcNow.AddMilliseconds(CursedCameraDelay))); }                  
 
-                    
-                    Log("New Frame");
-                    int Count = CursedCamera.Count;
-                    
-
-                    if (Count >= 1) {
+                    if (CursedCamera.Count >= 1) {
                         if (CursedCamera.Peek().Ready) {
                             CameraTransform DesiredPos = CursedCamera.Dequeue();
                             CameraTransform TempPos = DesiredPos;
