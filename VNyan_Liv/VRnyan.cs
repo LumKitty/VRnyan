@@ -139,7 +139,7 @@ namespace VRnyan {
                     }
                 }
 
-                if ((VNyanSettings & SharedValues.LOGSPAMENABLED) !=0) {
+                //if ((VNyanSettings & SharedValues.LOGSPAMENABLED) !=0) {
                     //Log("Set POS: " + Camera.main.transform.position.ToString() + " ROT: " + Camera.main.transform.rotation.ToString() + " FOV: " + Camera.main.fieldOfView + " Settings: " + VNyanSettings);
                     
                     /*if (FramesElapsed >= 60) { FramesElapsed = 0; }
@@ -156,7 +156,7 @@ namespace VRnyan {
                         Log("----------------------------------------------------");
                     }
                     FramesElapsed++;*/
-                }
+                //}
                 if (CursedCameraDelay > 0) {
                     CursedCamera.Enqueue(new CameraTransform(CamPos, CamRot, DateTime.UtcNow.AddMilliseconds(CursedCameraDelay)));
 
@@ -179,22 +179,7 @@ namespace VRnyan {
                         }
                     }
 
-                    Log($"Queue before: {Count} Queue After: {CursedCamera.Count}");
-                        
-                    /*
-                    if (!CursedCamera[0].Ready) {
-                        CursedCamera[0].SetCam();
-                    } else {
-                        int n = 1;
-                        while (n < CursedCamera.Count && CursedCamera[n].Ready) {
-                            //Log(n.ToString()+"/" + CursedCamera.Count.ToString());
-                            n++;
-                        }
-                        CursedCamera[n - 1].SetCam();
-                        CursedCamera.RemoveRange(0, n);
-                    }
-                    */
-                    //Log ("Queue Len: "+CursedCamera.Count.ToString()+" Time: "+DateTime.UtcNow.ToString()+" Next trg time: " + CursedCamera[0].TargetTime);
+                    //Log($"Queue before: {Count} Queue After: {CursedCamera.Count}");
                 }
             } catch (Exception e) {
                 ErrorHandler(e);
