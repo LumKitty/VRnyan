@@ -38,7 +38,7 @@ namespace VRnyan {
         internal static MemoryMappedViewAccessor mmfAccess = null;
         private static GameObject objVRnyan = new GameObject("VRnyan", typeof(VRnyan));
 
-        private static List<CameraTransform> CursedCamera = new List<CameraTransform>();
+        private static Queue<CameraTransform> CursedCamera = new Queue<CameraTransform>();
 
         internal static bool IsActive => objVRnyan.activeSelf;
 
@@ -158,11 +158,30 @@ namespace VRnyan {
                     FramesElapsed++;*/
                 }
                 if (CursedCameraDelay > 0) {
-                    CursedCamera.Add(new CameraTransform(CamPos, CamRot, DateTime.UtcNow.AddMilliseconds(CursedCameraDelay)));
-                    //Log("New Frame");
-                    int Count = CursedCamera.Count;
-                    //Log("0/" + Count.ToString());
+                    CursedCamera.Enqueue(new CameraTransform(CamPos, CamRot, DateTime.UtcNow.AddMilliseconds(CursedCameraDelay)));
+
                     
+                    Log("New Frame");
+                    int Count = CursedCamera.Count;
+                    
+
+                    if (Count >= 1) {
+                        if (CursedCamera.Peek().Ready) {
+                            CameraTransform DesiredPos = CursedCamera.Dequeue();
+                            CameraTransform TempPos = DesiredPos;
+
+                            while (CursedCamera.TryPeek(out TempPos) && TempPos.Ready) {
+                                DesiredPos = CursedCamera.Dequeue();
+                            }
+                            DesiredPos.SetCam();
+                        } else {
+                            CursedCamera.Peek().SetCam();
+                        }
+                    }
+
+                    Log($"Queue before: {Count} Queue After: {CursedCamera.Count}");
+                        
+                    /*
                     if (!CursedCamera[0].Ready) {
                         CursedCamera[0].SetCam();
                     } else {
@@ -174,6 +193,7 @@ namespace VRnyan {
                         CursedCamera[n - 1].SetCam();
                         CursedCamera.RemoveRange(0, n);
                     }
+                    */
                     //Log ("Queue Len: "+CursedCamera.Count.ToString()+" Time: "+DateTime.UtcNow.ToString()+" Next trg time: " + CursedCamera[0].TargetTime);
                 }
             } catch (Exception e) {
