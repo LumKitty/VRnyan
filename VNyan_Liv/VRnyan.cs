@@ -70,10 +70,14 @@ namespace VRnyan {
             }
         }
         
-        public static Queue<CameraTransform> EnableFollowCam() {
+        public static void UpdateCursedCamera(Vector3 CamPos, Quaternion CamRot) {
+            Log($"Adding {CamPos.ToString()}, {CamRot.ToString()} to Cursed Camera");
+            CursedCamera.Enqueue(new CameraTransform(CamPos, CamRot, DateTime.UtcNow.AddMilliseconds(CursedCameraDelay)));
+        }
+        
+        public static void EnableFollowCam() {
             FollowCamEnabled = true;
             Log("FollowCam enabled");
-            return CursedCamera;
         }
         public static void DisableFollowCam() {
             FollowCamEnabled = false;
@@ -85,8 +89,9 @@ namespace VRnyan {
             mmfAccess.Write(SharedValues.MMFPos_ResX, Screen.width);
             mmfAccess.Write(SharedValues.MMFPos_ResY, Screen.height);
         }
-
+        
         public void UpdateMMF(Vector3 CamPos, Quaternion CamRot) {
+            Log("Local UpdateMMF called");
             mmfAccess.Write(SharedValues.MMFPos_CamPosX, CamPos.x);
             mmfAccess.Write(SharedValues.MMFPos_CamPosY, CamPos.y);
             mmfAccess.Write(SharedValues.MMFPos_CamPosZ, CamPos.z);
@@ -97,6 +102,20 @@ namespace VRnyan {
             mmfAccess.Write(SharedValues.MMFPos_CamFOV,  Camera.main.fieldOfView);
         }
         
+
+        public static MemoryMappedViewAccessor GetMMF() {
+            if (mmfAccess == null) {
+                if (IsWine() && (LinuxRootDriveLetter >= 'a') && (LinuxRootDriveLetter <= 'z')) {
+                    Log("Initialise MMF - Wine/Linux shared memory");
+                    mmfAccess = MMF_Wine.InitialiseMMF();
+                } else {
+                    Log("Initialise MMF - Windows shared memory");
+                    mmfAccess = MMF_Windows.InitialiseMMF();
+                }
+            }
+            return mmfAccess;
+        }
+
         public void LateUpdate() {
             
             Vector3 CamPos;
@@ -106,6 +125,7 @@ namespace VRnyan {
                     CamPos = Camera.main.transform.position;
                     CamRot = Camera.main.transform.rotation;
                     UpdateMMF(CamPos, CamRot);
+                    //UpdateMMF(CamPos.x, CamPos.y, CamPos.z, CamRot.w, CamRot.x, CamRot.y, CamRot.z);
                 } else {
                     CameraTransform DesiredPos = CursedCamera.Peek();
                     CamPos = DesiredPos.Position;
