@@ -15,29 +15,6 @@ namespace VRnyan {
         public string Author { get; } = SharedValues.Author;
         public string Website { get; } = SharedValues.Website;
 
-        //private static System.Reflection.MethodInfo _GetFollowCamTransform;
-        //private static System.Reflection.MethodInfo _GetFollowCamRot;
-        internal static Transform FollowCamTransform;
-
-        internal static void ConnectFollowCam() {
-            Log("Looking for FollowCam");
-            var type = Type.GetType("VNyan_FollowCam.FollowCam, VNyan-FollowCam", throwOnError: false);
-            if (type != null) {
-                Log("Found VNyan followcam, getting methods");
-                System.Reflection.MethodInfo GetFollowCamTransform = type.GetMethod("GetFollowCamTransform");
-                if (GetFollowCamTransform == null) {
-                    Log("Couldn't find position methods");
-                } else {
-                    FollowCamTransform = (Transform)GetFollowCamTransform?.Invoke(null, new object[] { (int)0 });
-                    Log("Got methods, testing...");
-                    Log(FollowCamTransform.position.ToString());
-                    Log(FollowCamTransform.rotation.eulerAngles.ToString());
-                }
-            } else {
-                Log("Did not find followcam assembly");
-            }
-        }
-
         public void InitializePlugin() {
             try {
                 Log("VRNyan version " + Version + " started");
@@ -52,7 +29,8 @@ namespace VRnyan {
                     Log("Register plugin button");
                     VNyanInterface.VNyanInterface.VNyanUI.registerPluginButton("VRnyan", this);
                 }
-                ConnectFollowCam();
+                //FollowCam_Handlers.ConnectFollowCam();
+                FollowCam_Handlers.LogAssemblyName();
 
                 //Log("Spawning gameobject: VRnyan");
                 //VRnyan.objVRnyan = new GameObject("VRnyan", typeof(VRnyan));

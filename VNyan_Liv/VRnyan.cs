@@ -32,15 +32,19 @@ namespace VRnyan {
     
     public class VRnyan : MonoBehaviour {
 
-        internal static bool FollowCamEnabled = false;
         private static float[] CamData = new float[9];
         
         internal static MemoryMappedViewAccessor mmfAccess = null;
         private static GameObject objVRnyan = new GameObject("VRnyan", typeof(VRnyan));
 
-        private static Queue<CameraTransform> CursedCamera = new Queue<CameraTransform>();
+        internal static Queue<CameraTransform> CursedCamera = new Queue<CameraTransform>();
 
         internal static bool IsActive => objVRnyan.activeSelf;
+
+        public static void UpdateCursedCamera(Vector3 CamPos, Quaternion CamRot, string Source="Local") {
+            Log($"Adding {CamPos.ToString()}, {CamRot.ToString()} to Cursed Camera from {Source}");
+            CursedCamera.Enqueue(new CameraTransform(CamPos, CamRot, DateTime.UtcNow.AddMilliseconds(Settings.CursedCameraDelay)));
+        }
 
         internal static void SetActive(bool Active) {
             if (Active && !objVRnyan.activeSelf) {
@@ -69,20 +73,7 @@ namespace VRnyan {
                 Camera.main.usePhysicalProperties = true;
             }
         }
-        
-        public static void UpdateCursedCamera(Vector3 CamPos, Quaternion CamRot) {
-            Log($"Adding {CamPos.ToString()}, {CamRot.ToString()} to Cursed Camera");
-            CursedCamera.Enqueue(new CameraTransform(CamPos, CamRot, DateTime.UtcNow.AddMilliseconds(CursedCameraDelay)));
-        }
-        
-        public static void EnableFollowCam() {
-            FollowCamEnabled = true;
-            Log("FollowCam enabled");
-        }
-        public static void DisableFollowCam() {
-            FollowCamEnabled = false;
-            Log("FollowCam disabled");
-        }
+       
 
         public void OnRectTransformDimensionsChange() {
             Log("Window size changed to: " + Screen.width.ToString() + "," + Screen.height.ToString());
@@ -90,8 +81,8 @@ namespace VRnyan {
             mmfAccess.Write(SharedValues.MMFPos_ResY, Screen.height);
         }
         
-        public void UpdateMMF(Vector3 CamPos, Quaternion CamRot) {
-            Log("Local UpdateMMF called");
+        public static void UpdateMMF(Vector3 CamPos, Quaternion CamRot, string Source="Local") {
+            // Log($"Local UpdateMMF called from {Source}");
             mmfAccess.Write(SharedValues.MMFPos_CamPosX, CamPos.x);
             mmfAccess.Write(SharedValues.MMFPos_CamPosY, CamPos.y);
             mmfAccess.Write(SharedValues.MMFPos_CamPosZ, CamPos.z);
@@ -101,40 +92,20 @@ namespace VRnyan {
             mmfAccess.Write(SharedValues.MMFPos_CamRotZ, CamRot.z);
             mmfAccess.Write(SharedValues.MMFPos_CamFOV,  Camera.main.fieldOfView);
         }
-        
-
-        public static MemoryMappedViewAccessor GetMMF() {
-            if (mmfAccess == null) {
-                if (IsWine() && (LinuxRootDriveLetter >= 'a') && (LinuxRootDriveLetter <= 'z')) {
-                    Log("Initialise MMF - Wine/Linux shared memory");
-                    mmfAccess = MMF_Wine.InitialiseMMF();
-                } else {
-                    Log("Initialise MMF - Windows shared memory");
-                    mmfAccess = MMF_Windows.InitialiseMMF();
-                }
-            }
-            return mmfAccess;
-        }
 
         public void LateUpdate() {
             
             Vector3 CamPos;
             Quaternion CamRot;
             try {
-                if (!FollowCamEnabled) {
+                if (FollowCam_Handlers.MainFollowCamActive) {
+                    CamPos = FollowCam_Handlers.FollowCamPos;
+                    CamRot = FollowCam_Handlers.FollowCamRot;
+                } else {
                     CamPos = Camera.main.transform.position;
                     CamRot = Camera.main.transform.rotation;
                     UpdateMMF(CamPos, CamRot);
-                    //UpdateMMF(CamPos.x, CamPos.y, CamPos.z, CamRot.w, CamRot.x, CamRot.y, CamRot.z);
-                } else {
-                    CameraTransform DesiredPos = CursedCamera.Peek();
-                    CamPos = DesiredPos.Position;
-                    CamRot = DesiredPos.Rotation;
                 }
-
-                
-                    // var camera = Camera.main;
-                
                 
                 // Only used by OnAirTap. Ignored by LIV_VNyan.dll
                 mmfAccess.Write(SharedValues.MMFPos_ResX, Screen.width);
@@ -167,26 +138,9 @@ namespace VRnyan {
                     }
                 }
 
-                //if ((VNyanSettings & SharedValues.LOGSPAMENABLED) !=0) {
-                    //Log("Set POS: " + Camera.main.transform.position.ToString() + " ROT: " + Camera.main.transform.rotation.ToString() + " FOV: " + Camera.main.fieldOfView + " Settings: " + VNyanSettings);
-                    
-                    /*if (FramesElapsed >= 60) { FramesElapsed = 0; }
-                    if (FramesElapsed == 0) {
-                        Log("FOV                    : " + Camera.main.fieldOfView.ToString());
-                        Log("Physical Camera Enabled: " + Camera.main.usePhysicalProperties.ToString());
-                        Log("Focal Length           : " + Camera.main.focalLength.ToString());
-                        Log("Orthograhpic           : " + Camera.main.orthographic.ToString());
-                        Log("Sensor Size            : " + Camera.main.sensorSize.ToString());
-                        Log("Lens Shift             : " + Camera.main.lensShift.ToString());
-                        Log("Gate Fit               : " + Camera.main.gateFit.ToString());
-                        Log("Height                 : " + Camera.main.pixelHeight.ToString());
-                        Log("Width                  : " + Camera.main.pixelWidth.ToString());
-                        Log("----------------------------------------------------");
-                    }
-                    FramesElapsed++;*/
-                //}
-                if (CursedCameraDelay > 0) {
-                    if (!FollowCamEnabled) { CursedCamera.Enqueue(new CameraTransform(CamPos, CamRot, DateTime.UtcNow.AddMilliseconds(CursedCameraDelay))); }                  
+                FollowCam_Handlers.VRNyanControllingCamera = (CursedCameraDelay > 0);
+                if (FollowCam_Handlers.VRNyanControllingCamera) {
+                    if (!FollowCam_Handlers.MainFollowCamActive) { UpdateCursedCamera(CamPos, CamRot); }
 
                     if (CursedCamera.Count >= 1) {
                         if (CursedCamera.Peek().Ready) {
@@ -200,10 +154,16 @@ namespace VRnyan {
                         } else {
                             CursedCamera.Peek().SetCam();
                         }
+                    } else {
+                        if (FollowCam_Handlers.MainFollowCamActive) {
+                            Camera.main.transform.position = CamPos;
+                            Camera.main.transform.rotation = CamRot;
+                        }
                     }
 
                     //Log($"Queue before: {Count} Queue After: {CursedCamera.Count}");
                 }
+                // Log($"VRNyanControllingCamera: {FollowCam_Handlers.VRNyanControllingCamera}, MainFollowCamActive: {FollowCam_Handlers.MainFollowCamActive}");
             } catch (Exception e) {
                 ErrorHandler(e);
             }
