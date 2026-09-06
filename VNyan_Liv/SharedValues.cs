@@ -15,7 +15,7 @@ namespace VRnyan {
 
         public const int CAMENABLED          = Shared.LegacySharedValues.CAMENABLED; // 0x1
         public const int LOGENABLED          = Shared.LegacySharedValues.LOGENABLED; // 0x2
-        public const int LOGSPAMENABLED      = Shared.LegacySharedValues.LOGSPAMENABLED; // 0x3
+        public const int LOGSPAMENABLED      = Shared.LegacySharedValues.LOGSPAMENABLED; // 0x4
         public const int OATREADCLIPPLANEPOS = 0x8;
 
         public const long MMFPos_CamPosX  = Shared.LegacySharedValues.MMFPos_CamPosX; //0;

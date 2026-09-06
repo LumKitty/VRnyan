@@ -147,6 +147,7 @@ namespace VRnyan {
                     SavePluginSettings();
                 }
                 VNyanSettings = tempVNyanSettings;
+                Log($"VNyanSettings: {VNyanSettings}");
             } catch (Exception e) {
                 ErrorHandler(e);
             }
