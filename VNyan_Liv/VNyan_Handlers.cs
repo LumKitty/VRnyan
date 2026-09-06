@@ -8,7 +8,7 @@ using static VRnyan.Settings;
 
 namespace VRnyan {
     public class VNyan_Handlers : IVNyanPluginManifest, IButtonClickedHandler, ITriggerHandler {
-        private const string VersionString = "2.3-RC5";
+        private const string VersionString = "2.3-RC6";
         public string PluginName { get; } = SharedValues.PluginName;
         public string Version { get; } = VersionString;
         public string Title { get; } = SharedValues.PluginName + " " + VersionString;

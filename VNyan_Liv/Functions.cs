@@ -14,6 +14,13 @@ namespace VRnyan {
                 UnityEngine.Debug.Log("[VRnyan] " + message);
             }
         }
+
+        internal static void LogSpam(string message) {
+            if (((VNyanSettings & SharedValues.LOGENABLED) != 0) && ((VNyanSettings & SharedValues.LOGSPAMENABLED) != 0)) {
+                UnityEngine.Debug.Log("[VRnyan] " + message);
+            }
+        }
+
         internal static void ErrorHandler(Exception e) {
             VNyanInterface.VNyanInterface.VNyanParameter.setVNyanParameterString("_lum_liv_err", e.ToString());
             UnityEngine.Debug.Log("[VRnyan] ERR:" + e.ToString());

@@ -42,7 +42,7 @@ namespace VRnyan {
         internal static bool IsActive => objVRnyan.activeSelf;
 
         public static void UpdateCursedCamera(Vector3 CamPos, Quaternion CamRot, string Source="Local") {
-            Log($"Adding {CamPos.ToString()}, {CamRot.ToString()} to Cursed Camera from {Source}");
+            LogSpam($"Adding {CamPos.ToString()}, {CamRot.ToString()} to Cursed Camera from {Source}");
             CursedCamera.Enqueue(new CameraTransform(CamPos, CamRot, DateTime.UtcNow.AddMilliseconds(Settings.CursedCameraDelay)));
         }
 
@@ -83,14 +83,16 @@ namespace VRnyan {
         
         public static void UpdateMMF(Vector3 CamPos, Quaternion CamRot, string Source="Local") {
             // Log($"Local UpdateMMF called from {Source}");
-            mmfAccess.Write(SharedValues.MMFPos_CamPosX, CamPos.x);
-            mmfAccess.Write(SharedValues.MMFPos_CamPosY, CamPos.y);
-            mmfAccess.Write(SharedValues.MMFPos_CamPosZ, CamPos.z);
-            mmfAccess.Write(SharedValues.MMFPos_CamRotW, CamRot.w);
-            mmfAccess.Write(SharedValues.MMFPos_CamRotX, CamRot.x);
-            mmfAccess.Write(SharedValues.MMFPos_CamRotY, CamRot.y);
-            mmfAccess.Write(SharedValues.MMFPos_CamRotZ, CamRot.z);
-            mmfAccess.Write(SharedValues.MMFPos_CamFOV,  Camera.main.fieldOfView);
+            if (mmfAccess != null) {
+                mmfAccess.Write(SharedValues.MMFPos_CamPosX, CamPos.x);
+                mmfAccess.Write(SharedValues.MMFPos_CamPosY, CamPos.y);
+                mmfAccess.Write(SharedValues.MMFPos_CamPosZ, CamPos.z);
+                mmfAccess.Write(SharedValues.MMFPos_CamRotW, CamRot.w);
+                mmfAccess.Write(SharedValues.MMFPos_CamRotX, CamRot.x);
+                mmfAccess.Write(SharedValues.MMFPos_CamRotY, CamRot.y);
+                mmfAccess.Write(SharedValues.MMFPos_CamRotZ, CamRot.z);
+                mmfAccess.Write(SharedValues.MMFPos_CamFOV, Camera.main.fieldOfView);
+            }
         }
 
         public void LateUpdate() {
