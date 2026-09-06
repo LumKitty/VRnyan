@@ -30,7 +30,7 @@ namespace VRnyan {
                     VNyanInterface.VNyanInterface.VNyanUI.registerPluginButton("VRnyan", this);
                 }
                 //FollowCam_Handlers.ConnectFollowCam();
-                FollowCam_Handlers.LogAssemblyName();
+                //FollowCam_Handlers.LogAssemblyName();
 
                 //Log("Spawning gameobject: VRnyan");
                 //VRnyan.objVRnyan = new GameObject("VRnyan", typeof(VRnyan));
