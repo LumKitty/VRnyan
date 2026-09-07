@@ -16,7 +16,7 @@ It is important to understand how this plugin works. Normally LIV will split the
 * OBS
   * [Spout2](https://github.com/Off-World-Live/obs-spout2-plugin) plugin
   * [Advanced Mask](https://obsproject.com/forum/resources/advanced-masks.1856/) plugin
-* OnAirTap, or LIV VR
+* OnAirTap, VapourTap or LIV VR
   * OnAirTap specific
     * Understanding of how to mod your chosen game (BepInEx or BSIPA, more to come soon)
     * Your game uses the LIV 1.5 SDK (If LIV_Bridge.dll is present it should work
@@ -42,6 +42,11 @@ OnAirTap advantages:
 * Foreground / background split can be dynamic, based on e.g. the position of your VTuber hip bone
 * Rendering can be tweaked in great detail (some may see this is as a disadvantage, however)
 * Once initial config is done, stream startup requires fewer separate apps compared to LIV
+* Some updated games where LIV support is broken still work when OnAirTap is used
+
+VapourTap advangages:
+* Works with games that use the SteamVR Unity Plugin and do not support LIV
+* Otherwise identical to OnAirTap
 
 LIV advantages:
 * Wider game compatability due to not needing to support every different Unity mod loader ever made
@@ -66,6 +71,7 @@ LIV advantages:
 * Download the latest version of [OnAirTap](https://github.com/milkydelta/OnAirTap) - Get the OpenBrush build
 * Install the latest version of [BepInEx](https://github.com/bepinex/bepinex) following its instructions
 * Install the mod by unpacking the OpenBrush build. If you are attempting to use this with a different game you will need to use a different directory for OAT_KlakSpout.dll instead of OpenBrush_Data. Typically it will be GameName_Data\Plugins\x86_64
+* For some very old games, you may need an [older build of KlakSpout](https://github.com/milkydelta/OAT.KlakSpout.Runtime)
 * Start the game once and quit
 * The config file is located in: <GAMEDIR>\BepInEx\config\OnAirTap.cfg
 
