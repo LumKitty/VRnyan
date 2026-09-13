@@ -47,7 +47,9 @@ namespace VRnyan {
                     Log("Starting VRnyan at launch");
                     VRnyan.SetActive(true);
                 }
-                Log($"Assembly name: {typeof(VRnyan).AssemblyQualifiedName}");
+                if (((VNyanSettings & SharedValues.LOGENABLED) != 0) && ((VNyanSettings & SharedValues.LOGSPAMENABLED) != 0)) {
+                    Debug.StartDebug();
+                }
             } catch (Exception e) {
                 ErrorHandler(e);
             }

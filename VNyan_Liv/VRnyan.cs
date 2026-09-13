@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.IO.MemoryMappedFiles;
+using System.Linq;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -29,21 +30,26 @@ namespace VRnyan {
             Camera.main.transform.rotation = Rotation;
         }
     }
-    
+
     public class VRnyan : MonoBehaviour {
 
+        internal const int MaxQueueLen = 1000;
         private static float[] CamData = new float[9];
-        
+
         internal static MemoryMappedViewAccessor mmfAccess = null;
         private static GameObject objVRnyan = new GameObject("VRnyan", typeof(VRnyan));
 
-        internal static Queue<CameraTransform> CursedCamera = new Queue<CameraTransform>();
+        internal static ConcurrentQueue<CameraTransform> CursedCamera = new ConcurrentQueue<CameraTransform>();
 
         internal static bool IsActive => objVRnyan.activeSelf;
 
-        public static void UpdateCursedCamera(Vector3 CamPos, Quaternion CamRot, string Source="Local") {
-            LogSpam($"Adding {CamPos.ToString()}, {CamRot.ToString()} to Cursed Camera from {Source}");
-            CursedCamera.Enqueue(new CameraTransform(CamPos, CamRot, DateTime.UtcNow.AddMilliseconds(Settings.CursedCameraDelay)));
+        public static void UpdateCursedCamera(Vector3 CamPos, Quaternion CamRot, string Source = "Local") {
+            if (CursedCamera.Count < MaxQueueLen) {
+                LogSpam($"Adding {CamPos.ToString()}, {CamRot.ToString()} to Cursed Camera from {Source}");
+                CursedCamera.Enqueue(new CameraTransform(CamPos, CamRot, DateTime.UtcNow.AddMilliseconds(Settings.CursedCameraDelay)));
+            } else {
+                Log($"ERROR: CursedCamera Queue length has exceeded {MaxQueueLen} - Lum fucked something up!");
+            }
         }
 
         internal static void SetActive(bool Active) {
@@ -71,16 +77,17 @@ namespace VRnyan {
                 CursedCamera.Clear();
                 if (mmfAccess != null) { mmfAccess.Write(SharedValues.MMFPos_Settings, VNyanSettings); }
                 Camera.main.usePhysicalProperties = true;
+                FollowCam_Handlers.VRNyanControllingCamera = false;
             }
         }
-       
+
 
         public void OnRectTransformDimensionsChange() {
             Log("Window size changed to: " + Screen.width.ToString() + "," + Screen.height.ToString());
             mmfAccess.Write(SharedValues.MMFPos_ResX, Screen.width);
             mmfAccess.Write(SharedValues.MMFPos_ResY, Screen.height);
         }
-        
+
         public static void UpdateMMF(Vector3 CamPos, Quaternion CamRot, string Source="Local") {
             // Log($"Local UpdateMMF called from {Source}");
             if (mmfAccess != null) {
@@ -96,7 +103,7 @@ namespace VRnyan {
         }
 
         public void LateUpdate() {
-            
+
             Vector3 CamPos;
             Quaternion CamRot;
             try {
@@ -108,7 +115,7 @@ namespace VRnyan {
                     CamRot = Camera.main.transform.rotation;
                     UpdateMMF(CamPos, CamRot);
                 }
-                
+
                 // Only used by OnAirTap. Ignored by LIV_VNyan.dll
                 mmfAccess.Write(SharedValues.MMFPos_ResX, Screen.width);
                 mmfAccess.Write(SharedValues.MMFPos_ResY, Screen.height);
@@ -144,17 +151,50 @@ namespace VRnyan {
                 if (FollowCam_Handlers.VRNyanControllingCamera) {
                     if (!FollowCam_Handlers.MainFollowCamActive) { UpdateCursedCamera(CamPos, CamRot); }
 
-                    if (CursedCamera.Count >= 1) {
-                        if (CursedCamera.Peek().Ready) {
-                            CameraTransform DesiredPos = CursedCamera.Dequeue();
-                            CameraTransform TempPos = DesiredPos;
+                    CameraTransform DesiredPos = null;
+                    CameraTransform TempPos;
+                    int CameraCount = CursedCamera.Count;
 
-                            while (CursedCamera.TryPeek(out TempPos) && TempPos.Ready) {
-                                DesiredPos = CursedCamera.Dequeue();
+                    if (CameraCount > 1) {
+
+                        /*
+                        if (CursedCamera.TryPeek(out TempPos) && TempPos.Ready) {
+                            CursedCamera.TryDequeue(out DesiredPos);
+                            DesiredPos = TempPos;
+
+                            while ((CursedCamera.Count > 1) && CursedCamera.TryPeek(out TempPos) && TempPos.Ready) {
+                                CursedCamera.TryDequeue(out DesiredPos);
+                                DesiredPos = TempPos;
                             }
                             DesiredPos.SetCam();
+                            //} else {
+                            //    CursedCamera.Peek().SetCam();
                         } else {
-                            CursedCamera.Peek().SetCam();
+                            if (FollowCam_Handlers.MainFollowCamActive) {
+                                Camera.main.transform.position = CamPos;
+                                Camera.main.transform.rotation = CamRot;
+                            }
+                        } */
+                        if (!CursedCamera.TryPeek(out TempPos)) { Log("TryPeek failed outside loop"); }
+                        DesiredPos = TempPos;
+                        while (CameraCount > 1 && TempPos.Ready) {
+                            if (!CursedCamera.TryDequeue(out DesiredPos)) { Log("TryDequeue failed"); }
+                            if (!CursedCamera.TryPeek(out TempPos)) { Log("TryPeek failed"); }
+                            CameraCount = CursedCamera.Count;
+                        }
+                        if ((CameraCount == 1) && TempPos.Ready) { 
+                            DesiredPos = TempPos; 
+                        }
+                        DesiredPos.SetCam();
+
+                    } else if (CameraCount == 1) {
+                        if (CursedCamera.TryPeek(out DesiredPos)) {
+                            DesiredPos.SetCam();
+                        } else {
+                            if (FollowCam_Handlers.MainFollowCamActive) {
+                                Camera.main.transform.position = CamPos;
+                                Camera.main.transform.rotation = CamRot;
+                            }
                         }
                     } else {
                         if (FollowCam_Handlers.MainFollowCamActive) {
