@@ -7,13 +7,16 @@ using static VRnyan.Functions;
 using static VRnyan.Settings;
 
 namespace VRnyan {
-    public class VNyan_Handlers : IVNyanPluginManifest, IButtonClickedHandler, ITriggerHandler {
-        private const string VersionString = "2.3-RC8";
+    public class VNyan_Handlers : MonoBehaviour, IVNyanPluginManifest, IButtonClickedHandler, ITriggerHandler {
+        internal const string VersionString = "2.3-RC8-gui";
         public string PluginName { get; } = SharedValues.PluginName;
         public string Version { get; } = VersionString;
         public string Title { get; } = SharedValues.PluginName + " " + VersionString;
         public string Author { get; } = SharedValues.Author;
         public string Website { get; } = SharedValues.Website;
+
+        internal static GUI objGUI = null;
+        private static GameObject objVRnyanQuitHandler = new GameObject("VRnyan-QuitHandler", typeof(VNyan_Handlers)); // This is purely to handle OnApplicationQuit() and I hate it!
 
         public void InitializePlugin() {
             try {
@@ -40,7 +43,7 @@ namespace VRnyan {
 
                 VRnyan.SetActive(false);
                 LoadPluginSettings();
-                VRnyan_GUI.SetActive(false);
+                //VRnyan_GUI.SetActive(false);
                 
                 Log($"VNyanSettings: {VNyanSettings}");
                 if ((VNyanSettings & SharedValues.CAMENABLED) != 0) {
@@ -50,6 +53,7 @@ namespace VRnyan {
                 if (((VNyanSettings & SharedValues.LOGENABLED) != 0) && ((VNyanSettings & SharedValues.LOGSPAMENABLED) != 0)) {
                     Debug.StartDebug();
                 }
+
             } catch (Exception e) {
                 ErrorHandler(e);
             }
@@ -57,15 +61,21 @@ namespace VRnyan {
 
         public void pluginButtonClicked() {
             Log("Plugin button clicked");
-            VRnyan_GUI.ToggleActive();
+            //VRnyan_GUI.ToggleActive();
+            if (objGUI == null) {
+                objGUI = new GUI();
+            } else {
+                objGUI.Show();
+            }
+
             //VRnyan.SetActive(!VRnyan.IsActive);
-            Log("Enabled: " + ((VNyanSettings & SharedValues.CAMENABLED) != 0).ToString());
+            //Log("Enabled: " + ((VNyanSettings & SharedValues.CAMENABLED) != 0).ToString());
             return;
         }
 
         public void triggerCalled(string name, int int1, int int2, int int3, string text1, string text2, string text3) {
             try {
-                if (name == VRnyan_GUI.CloseTriggerName && text1 != VRnyan_GUI.CloseTriggerValue) { VRnyan_GUI.SetActive(false); }
+                //if (name == VRnyan_GUI.CloseTriggerName && text1 != VRnyan_GUI.CloseTriggerValue) { VRnyan_GUI.SetActive(false); }
                 if (name.Length > 10) {
                     name = name.ToLower();
                     if (name.Substring(0, 8) == "_lum_vr_") {
@@ -118,6 +128,11 @@ namespace VRnyan {
                 ErrorHandler(e);
             }
             return;
+        }
+
+        public void OnApplicationQuit() {
+            Log("Quitting. Saving settings");
+            Settings.SavePluginSettings();
         }
     }
 }

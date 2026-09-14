@@ -85,6 +85,7 @@ namespace VRnyan {
                 objVRnyan.SetActive(true);
                 Log("Disable physical camera");
                 Camera.main.usePhysicalProperties = false;
+                if (VNyan_Handlers.objGUI != null) { VNyan_Handlers.objGUI.lblStatus.setText("Status - Active"); }
             } else if (!Active && objVRnyan.activeSelf) {
                 VNyanSettings = (VNyanSettings | SharedValues.CAMENABLED) - SharedValues.CAMENABLED;
                 objVRnyan.SetActive(false);
@@ -92,6 +93,7 @@ namespace VRnyan {
                 if (mmfAccess != null) { mmfAccess.Write(SharedValues.MMFPos_Settings, VNyanSettings); }
                 Camera.main.usePhysicalProperties = true;
                 FollowCam_Handlers.VRNyanControllingCamera = false;
+                if (VNyan_Handlers.objGUI != null) { VNyan_Handlers.objGUI.lblStatus.setText("Status - Disabled"); }
             }
         }
        
@@ -117,7 +119,7 @@ namespace VRnyan {
         }
 
         internal static CameraTransform DesiredPos = new CameraTransform(new Vector3(), new Quaternion(), 0, 0);
-        internal static CameraTransform TempPos;
+        //internal static CameraTransform TempPos;
 
         public void LateUpdate() {
             
