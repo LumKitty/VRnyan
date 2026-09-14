@@ -14,19 +14,22 @@ namespace VRnyan {
     public class CameraTransform {
         public Vector3 Position;
         public Quaternion Rotation;
-        public DateTime TargetTime;
+        public ulong Sequence;
+        public double TargetTime;
 
-        public CameraTransform(Vector3 _Position, Quaternion _Rotation, DateTime _TargetTime) {
+        public CameraTransform(Vector3 _Position, Quaternion _Rotation, ulong _Sequence, double _TargetTime) {
             Position = _Position;
             Rotation = _Rotation;
+            Sequence = _Sequence;
             TargetTime = _TargetTime;
         }
         public bool Ready {
-            get { return (DateTime.UtcNow >= TargetTime); }
+            get { return (UnityEngine.Time.realtimeSinceStartupAsDouble >= TargetTime); }
         }
         public void SetCam() {
             Camera.main.transform.position = Position;
             Camera.main.transform.rotation = Rotation;
+            LogSpam($"Sequence counter: {Sequence}, Timestamp: {TargetTime}");
         }
     }
     
@@ -41,9 +44,9 @@ namespace VRnyan {
 
         internal static bool IsActive => objVRnyan.activeSelf;
 
-        public static void UpdateCursedCamera(Vector3 CamPos, Quaternion CamRot, string Source="Local") {
-            LogSpam($"Adding {CamPos.ToString()}, {CamRot.ToString()} to Cursed Camera from {Source}");
-            CursedCamera.Enqueue(new CameraTransform(CamPos, CamRot, DateTime.UtcNow.AddMilliseconds(Settings.CursedCameraDelay)));
+        public static void UpdateCursedCamera(Vector3 CamPos, Quaternion CamRot, ulong Sequence, double TimeStamp, string Source="Local") {
+            // LogSpam($"Adding {CamPos.ToString()}, {CamRot.ToString()} to Cursed Camera from {Source}");
+            CursedCamera.Enqueue(new CameraTransform(CamPos, CamRot, Sequence, TimeStamp + (Settings.CursedCameraDelay / 1000d)));
         }
 
         internal static void SetActive(bool Active) {
@@ -103,6 +106,7 @@ namespace VRnyan {
             
             Vector3 CamPos;
             Quaternion CamRot;
+            double Now = UnityEngine.Time.realtimeSinceStartupAsDouble;
             try {
                 if (FollowCam_Handlers.MainFollowCamActive) {
                     CamPos = FollowCam_Handlers.FollowCamPos;
@@ -131,22 +135,22 @@ namespace VRnyan {
                         mmfAccess.Write(SharedValues.MMFPos_ClipPosX, ClipPos.x);
                         mmfAccess.Write(SharedValues.MMFPos_ClipPosY, ClipPos.y);
                         mmfAccess.Write(SharedValues.MMFPos_ClipPosZ, ClipPos.z);
-                        if ((VNyanSettings & SharedValues.LOGSPAMENABLED) != 0) {
-                            Log("Set Bone POS: " + ClipPos.ToString());
-                        }
+                        //if ((VNyanSettings & SharedValues.LOGSPAMENABLED) != 0) {
+                        //    Log("Set Bone POS: " + ClipPos.ToString());
+                        //}
                     } else {
                         mmfAccess.Write(SharedValues.MMFPos_ClipPosX, BoneTransform.position.x);
                         mmfAccess.Write(SharedValues.MMFPos_ClipPosY, BoneTransform.position.y);
                         mmfAccess.Write(SharedValues.MMFPos_ClipPosZ, BoneTransform.position.z);
-                        if ((VNyanSettings & SharedValues.LOGSPAMENABLED) != 0) {
-                            Log("Set Bone POS: " + BoneTransform.position.ToString());
-                        }
+                        //if ((VNyanSettings & SharedValues.LOGSPAMENABLED) != 0) {
+                        //    Log("Set Bone POS: " + BoneTransform.position.ToString());
+                        //}
                     }
                 }
 
                 FollowCam_Handlers.VRNyanControllingCamera = (CursedCameraDelay > 0);
                 if (FollowCam_Handlers.VRNyanControllingCamera) {
-                    if (!FollowCam_Handlers.MainFollowCamActive) { UpdateCursedCamera(CamPos, CamRot); }
+                    if (!FollowCam_Handlers.MainFollowCamActive) { UpdateCursedCamera(CamPos, CamRot,0, Now); }
 
                     if (CursedCamera.Count >= 1) {
                         TempPos = CursedCamera.Peek();
