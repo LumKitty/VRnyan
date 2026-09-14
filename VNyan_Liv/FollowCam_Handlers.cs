@@ -21,13 +21,14 @@ namespace VRnyan {
             } 
             FollowCamPos = CamPos;
             FollowCamRot = CamRot;
-            VRnyan.UpdateMMF(CamPos, CamRot, "FollowCam");
+            //VRnyan.UpdateMMF(CamPos, CamRot, "FollowCam");
         }
 
         public static bool GetVRNyanControllingCamera() { return VRNyanControllingCamera; }
         public static void SetMainFollowCamActive(bool Active) { MainFollowCamActive = Active; }
         public static bool GetMainFollowCamActive() { return MainFollowCamActive; }
 
+        public static MemoryMappedViewAccessor Get_MMF() { return VRnyan.mmfAccess; }
         public static Action<Vector3, Quaternion, ulong, double> Get_UpdateCameraPos() { return UpdateCameraPos; }
         public static Func<bool> Get_GetVRNyanControllingCamera() { return GetVRNyanControllingCamera; }
         public static Action<bool> Get_SetMainFollowCamActive() { return SetMainFollowCamActive; }

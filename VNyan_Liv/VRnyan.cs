@@ -26,10 +26,27 @@ namespace VRnyan {
         public bool Ready {
             get { return (UnityEngine.Time.realtimeSinceStartupAsDouble >= TargetTime); }
         }
+        
+        public bool GetReady(double TestTime) {
+            return (TestTime >= TargetTime);
+        }
+
+
         public void SetCam() {
             Camera.main.transform.position = Position;
             Camera.main.transform.rotation = Rotation;
             LogSpam($"Sequence counter: {Sequence}, Timestamp: {TargetTime}");
+        }
+
+        public bool ReturnIfReady(ref CameraTransform Output, double TestTime) {
+            if (TestTime >= TargetTime) {
+                Output.Position = Position;
+                Output.Rotation = Rotation;
+                Output.Sequence = Sequence;
+                Output.TargetTime = TargetTime;
+                return true;
+            }
+            return false;
         }
     }
     
@@ -86,7 +103,7 @@ namespace VRnyan {
         }
         
         public static void UpdateMMF(Vector3 CamPos, Quaternion CamRot, string Source="Local") {
-            // Log($"Local UpdateMMF called from {Source}");
+            //Log($"Local UpdateMMF called from {Source}");
             if (mmfAccess != null) {
                 mmfAccess.Write(SharedValues.MMFPos_CamPosX, CamPos.x);
                 mmfAccess.Write(SharedValues.MMFPos_CamPosY, CamPos.y);
@@ -99,7 +116,7 @@ namespace VRnyan {
             }
         }
 
-        internal static CameraTransform DesiredPos;
+        internal static CameraTransform DesiredPos = new CameraTransform(new Vector3(), new Quaternion(), 0, 0);
         internal static CameraTransform TempPos;
 
         public void LateUpdate() {
@@ -151,14 +168,15 @@ namespace VRnyan {
                 FollowCam_Handlers.VRNyanControllingCamera = (CursedCameraDelay > 0);
                 if (FollowCam_Handlers.VRNyanControllingCamera) {
                     if (!FollowCam_Handlers.MainFollowCamActive) { UpdateCursedCamera(CamPos, CamRot,0, Now); }
-
+                    
+                    /*
                     if (CursedCamera.Count >= 1) {
                         TempPos = CursedCamera.Peek();
-                        if (TempPos.Ready) {
+                        if (TempPos.GetReady(Now)) {
                             DesiredPos = CursedCamera.Dequeue();
                             TempPos = DesiredPos;
 
-                            while (CursedCamera.TryPeek(out TempPos) && TempPos.Ready) {
+                            while (CursedCamera.TryPeek(out TempPos) && TempPos.GetReady(Now)) {
                                 DesiredPos = CursedCamera.Dequeue();
                             }
                             DesiredPos.SetCam();
@@ -173,9 +191,19 @@ namespace VRnyan {
                             DesiredPos.SetCam();
                         }
                     }
+                    */
 
+                    //int Count = CursedCamera.Count;
+                    
+                    while (CursedCamera.Count >= 1 && CursedCamera.Peek().GetReady(Now)) {
+                        DesiredPos = CursedCamera.Dequeue();
+                    }
+                    DesiredPos.SetCam();
+                    
+                    //LogSpam($"Sequence: {DesiredPos.Sequence} - Timestamp: {DesiredPos.TargetTime}");
+                    
                     //Log($"Queue before: {Count} Queue After: {CursedCamera.Count}");
-                }
+                    }
                 // Log($"VRNyanControllingCamera: {FollowCam_Handlers.VRNyanControllingCamera}, MainFollowCamActive: {FollowCam_Handlers.MainFollowCamActive}");
             } catch (Exception e) {
                 ErrorHandler(e);
