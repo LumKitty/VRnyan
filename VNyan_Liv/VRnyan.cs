@@ -71,6 +71,7 @@ namespace VRnyan {
                 CursedCamera.Clear();
                 if (mmfAccess != null) { mmfAccess.Write(SharedValues.MMFPos_Settings, VNyanSettings); }
                 Camera.main.usePhysicalProperties = true;
+                FollowCam_Handlers.VRNyanControllingCamera = false;
             }
         }
        
@@ -94,6 +95,9 @@ namespace VRnyan {
                 mmfAccess.Write(SharedValues.MMFPos_CamFOV, Camera.main.fieldOfView);
             }
         }
+
+        internal static CameraTransform DesiredPos;
+        internal static CameraTransform TempPos;
 
         public void LateUpdate() {
             
@@ -145,21 +149,24 @@ namespace VRnyan {
                     if (!FollowCam_Handlers.MainFollowCamActive) { UpdateCursedCamera(CamPos, CamRot); }
 
                     if (CursedCamera.Count >= 1) {
-                        if (CursedCamera.Peek().Ready) {
-                            CameraTransform DesiredPos = CursedCamera.Dequeue();
-                            CameraTransform TempPos = DesiredPos;
+                        TempPos = CursedCamera.Peek();
+                        if (TempPos.Ready) {
+                            DesiredPos = CursedCamera.Dequeue();
+                            TempPos = DesiredPos;
 
                             while (CursedCamera.TryPeek(out TempPos) && TempPos.Ready) {
                                 DesiredPos = CursedCamera.Dequeue();
                             }
                             DesiredPos.SetCam();
                         } else {
-                            CursedCamera.Peek().SetCam();
+                            TempPos.SetCam();
+                            DesiredPos = TempPos;
                         }
                     } else {
                         if (FollowCam_Handlers.MainFollowCamActive) {
-                            Camera.main.transform.position = CamPos;
-                            Camera.main.transform.rotation = CamRot;
+                            //Camera.main.transform.position = CamPos;
+                            //Camera.main.transform.rotation = CamRot;
+                            DesiredPos.SetCam();
                         }
                     }
 
